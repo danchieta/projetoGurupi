@@ -2,17 +2,21 @@ import numpy as np
 import matplotlib.pyplot as plt 
 from PIL import Image
 
-def vecOfSub(shape):
-	V = np.zeros(shape)
-	for x in range(shape[0]):
-		for y in range(shape[1]):
-			V[x,y] = (x,y)
-	return V
+def ind2sub(ind,shp):
+	n = np.prod(shp)
+	return divmod(ind, shp[0])
+	
+
+def vecOfSub(shp):
+	n = prod(shp)
+	V = np.zeros((2,n))
+	for x in range(n):
+		V[:,x]
 
 
 f = 0.5
 
-r = vecOfSub((3,3))
+#r = vecOfSub((3,3))
 
 img = np.array(Image.open('../testIMG/imteste.png').convert('L'))
 

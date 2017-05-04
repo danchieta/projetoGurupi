@@ -2,16 +2,11 @@ import numpy as np
 import matplotlib.pyplot as plt 
 from PIL import Image
 
-def ind2sub(ind,shp):
-	n = np.prod(shp)
-	return divmod(ind, shp[0])
-	
-
 def vecOfSub(shp):
-	n = prod(shp)
-	V = np.zeros((2,n))
-	for x in range(n):
-		V[:,x]
+	x,y = np.meshgrid(range(shp[0]),range(shp[1]))
+	x = np.transpose(x,(1,x.size),order='f')
+	y = np.transpose(y,(1,y.size),order='f')
+	return np.array([x,y])
 
 
 f = 0.5

@@ -6,7 +6,7 @@ def vecOfSub(shp):
 	x,y = np.meshgrid(range(shp[0]),range(shp[1]))
 	x = np.reshape(x,(1,x.size),order='f')
 	y = np.reshape(y,(1,y.size),order='f')
-	return np.array(x,y)
+	return np.array(np.squeeze(x),np.squeeze(y))
 
 
 f = 0.5 # fator de subamostragem
@@ -18,7 +18,7 @@ R = np.array([[np.cos(theta) , np.sin(theta)],[-np.sin(theta) , np.cos(theta)] ]
 
 img = np.array(Image.open('../testIMG/imteste.png').convert('L'))
 
-d = img.size
+d = np.array(img.shape)
 dd = np.round(d*f).astype('int')
 
 

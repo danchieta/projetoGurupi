@@ -2,11 +2,12 @@ import numpy as np
 import matplotlib.pyplot as plt 
 from PIL import Image
 
+# function return vector of subscripts
 def vecOfSub(shp):
 	x,y = np.meshgrid(range(shp[0]),range(shp[1]))
-	x = np.reshape(x,(1,x.size),order='f')
-	y = np.reshape(y,(1,y.size),order='f')
-	return np.array(np.squeeze(x),np.squeeze(y))
+	x = np.reshape(x,(1,x.size),order='f').squeeze()
+	y = np.reshape(y,(1,y.size),order='f').squeeze()
+	return np.array([x,y])
 
 
 f = 0.5 # fator de subamostragem

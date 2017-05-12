@@ -2,6 +2,9 @@ import numpy as np
 import matplotlib.pyplot as plt 
 from PIL import Image
 
+from IPython.core.debugger import Tracer
+
+
 # function return vector of subscripts
 def vecOfSub(shp):
 	x,y = np.meshgrid(range(shp[0]),range(shp[1]))
@@ -9,40 +12,48 @@ def vecOfSub(shp):
 	y = np.reshape(y,(1,y.size),order='f').squeeze()
 	return np.array([x,y])
 
-def psf(i, j, gamma, theta, s, shapei, shapeo, v):
+def psf(j, i, gamma, theta, s, shapei, shapeo, v):
+	# numero de pixels em cada imagem
 	N = shapei.prod()
 	M = shapeo.prod()
 
+	# Matriz de rotação
 	R = np.array([[np.cos(theta) , np.sin(theta)],[-np.sin(theta), np.cos(theta)]]) 
 
+	#Vetores de subscritos das imagens de saida e entrada
 	vec_j = vecOfSub(shapeo)
 	vec_i = vecOfSub(shapei)
-
+	
+	
 	v = np.repeat(v,M).reshape(2,M)
 	s = np.repeat(s,M).reshape(2,M)
 
 	vec_u = np.dot(R, (vec_j-v))+v+s
+	print vec_u.shape
+	Tracer()()
+	vec_W = np.array([])
+	
+	for k in range(N):
+		vec_W = np.append(vec_W, -np.linalg.norm(vec_i[:,k] - vec_u[:,j])**2/gamma**2)
 
-	W = -np.linalg.norm(vec_i[:,i] - vec_u[:,j])**2/gamma**2
-
-	return W
+	return vec_W[j]/vec_W.sum()
 
 
 img = np.array(Image.open('../testIMG/imteste.png').convert('L'))
 
 f = 0.5 # fator de subamostragem
-gamma = 2.0
+gamma = 2.0 # tamanho da funcao de espalhamento de ponto
 
 
-d = np.array(img.shape)
-dd = np.round(d*f).astype('int')
+d = np.array(img.shape) #dimensoes da imagem de entrada
+dd = np.round(d*f).astype('int') #dimensoes da imagem de saida
 
-s = (0,0)
-v = (dd/2.0).round()
+s = (0,0) #deslocamento da imagem
+v = (dd/2.0).round() #centro da imagem 
 
 theta = np.pi/6 #angulo de rotacao
 
-W = psf(0,0,gamma, theta, s, d, dd, v)
+W = psf(0,0,gamma, theta, s, d, dd, v) #funcao de espalhamento de ponto
 
 imgr = Image.fromarray(img).convert('RGB')
 #imgr.save('res2.bmp')

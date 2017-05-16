@@ -12,12 +12,12 @@ def vecOfSub(shp):
 	y = np.reshape(y,(1,y.size),order='f').squeeze()
 	return np.array([x,y])
 
-def psf(j, i, gamma, theta, s, shapei, shapeo, v):
+def psf(j, gamma, theta, s, shapei, shapeo, v):
 	# numero de pixels em cada imagem
 	N = shapei.prod()
 	M = shapeo.prod()
 
-	# Matriz de rotação
+	# Matriz de rotacao
 	R = np.array([[np.cos(theta) , np.sin(theta)],[-np.sin(theta), np.cos(theta)]]) 
 
 	#Vetores de subscritos das imagens de saida e entrada
@@ -29,23 +29,24 @@ def psf(j, i, gamma, theta, s, shapei, shapeo, v):
 	s = np.repeat(s,M).reshape(2,M)
 
 	vec_u = np.dot(R, (vec_j-v))+v+s
-	print vec_u.shape
-	Tracer()()
+
 	vec_W = np.array([])
 	
 	for k in range(N):
 		vec_W = np.append(vec_W, -np.linalg.norm(vec_i[:,k] - vec_u[:,j])**2/gamma**2)
 
-	return vec_W[j]/vec_W.sum()
+	return vec_W/vec_W.sum()
 
 
 img = np.array(Image.open('../testIMG/imteste.png').convert('L'))
 
+d = np.array(img.shape) #dimensoes da imagem de entrada
+
+img = img.reshape(d.prod(),1)
+
 f = 0.5 # fator de subamostragem
 gamma = 2.0 # tamanho da funcao de espalhamento de ponto
 
-
-d = np.array(img.shape) #dimensoes da imagem de entrada
 dd = np.round(d*f).astype('int') #dimensoes da imagem de saida
 
 s = (0,0) #deslocamento da imagem
@@ -53,7 +54,13 @@ v = (dd/2.0).round() #centro da imagem
 
 theta = np.pi/6 #angulo de rotacao
 
-W = psf(0,0,gamma, theta, s, d, dd, v) #funcao de espalhamento de ponto
+y = np.zeros(dd.prod())
 
-imgr = Image.fromarray(img).convert('RGB')
+for i in range(dd.prod()):
+	W = psf(i,gamma, theta, s, d, dd, v) #funcao de espalhamento de ponto
+	y[i] = np.dot(W,img)
+
+
+
+#imgr = Image.fromarray(img).convert('RGB')
 #imgr.save('res2.bmp')

@@ -1,8 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt 
 from PIL import Image
-
-from IPython.core.debugger import Tracer
+from IPython import embed
 
 
 # function return vector of subscripts
@@ -24,7 +23,8 @@ def psf(j, gamma, theta, s, shapei, shapeo, v):
 	vec_j = vecOfSub(shapeo)
 	vec_i = vecOfSub(shapei)
 	
-	
+	#embed()
+
 	v = np.repeat(v,M).reshape(2,M)
 	s = np.repeat(s,M).reshape(2,M)
 
@@ -55,11 +55,12 @@ v = (dd/2.0).round() #centro da imagem
 theta = np.pi/6 #angulo de rotacao
 
 y = np.zeros(dd.prod())
+W = psf(0,gamma, theta, s, d, dd, v) #funcao de espalhamento de ponto
 
-for i in range(dd.prod()):
-	W = psf(i,gamma, theta, s, d, dd, v) #funcao de espalhamento de ponto
-	y[i] = np.dot(W,img)
 
+#for i in range(dd.prod()):
+#	W = psf(i,gamma, theta, s, d, dd, v) #funcao de espalhamento de ponto
+#	y[i] = np.dot(W,img)
 
 
 #imgr = Image.fromarray(img).convert('RGB')

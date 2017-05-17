@@ -23,14 +23,13 @@ def psf(j, gamma, theta, s, shapei, shapeo, v):
 	vec_j = vecOfSub(shapeo)
 	vec_i = vecOfSub(shapei)
 	
-	#embed()
-
-	v = np.repeat(v,M).reshape(2,M)
-	s = np.repeat(s,M).reshape(2,M)
+	v = v.reshape(2,1)
+	s = np.array(s).reshape(2,1)
 
 	vec_u = np.dot(R, (vec_j-v))+v+s
 
-	vec_W = -np.linalg.norm(vec_i - vec_u[:,j].reshape(2,1), axis=0)**2/gamma**2
+	vec_W = np.exp(-np.linalg.norm(vec_i - vec_u[:,j].reshape(2,1), axis=0)**2/gamma**2)
+
 
 	return vec_W/vec_W.sum()
 
@@ -41,8 +40,8 @@ d = np.array(img.shape) #dimensoes da imagem de entrada
 
 img = img.reshape(d.prod(),1)
 
-f = 0.1 # fator de subamostragem
-gamma = 0 # tamanho da funcao de espalhamento de ponto
+f = 1 # fator de subamostragem
+gamma = 2 # tamanho da funcao de espalhamento de ponto
 
 dd = np.round(d*f).astype('int') #dimensoes da imagem de saida
 

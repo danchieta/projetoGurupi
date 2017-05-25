@@ -33,31 +33,32 @@ def psf(j, gamma, theta, s, shapei, shapeo, v):
 
 	return vec_W/vec_W.sum()
 
+def degradaImagem(img, gamma, theta, s, f):
+	d = np.array(img.shape) #dimensoes da imagem de entrada
+	img = img.reshape(d.prod(),1)
+	dd = np.round(d*f).astype('int') #dimensoes da imagem de saida
+	v = (dd/2.0).round() #centro da imagem 
+	y = np.zeros(dd.prod()) #Vetor imagem resultante
 
-img = np.array(Image.open('../testIMG/imteste.png').convert('L'))
+	for i in range(dd.prod()):
+		W = psf(i,gamma, theta, s, d, dd, v) #gera uma linha imgrfuncao de espalhamento de ponto
+		y[i] = np.dot(W,img) #aplicacao da fucao de espalhamento de ponto
+		print 100.0*i/dd.prod()
 
-d = np.array(img.shape) #dimensoes da imagem de entrada
-
-img = img.reshape(d.prod(),1)
-
-f = 1 # fator de subamostragem
-gamma = 2 # tamanho da funcao de espalhamento de ponto
-
-dd = np.round(d*f).astype('int') #dimensoes da imagem de saida
-
-s = (0,0) #deslocamento da imagem
-v = (dd/2.0).round() #centro da imagem 
-
-theta = 0 #angulo de rotacao
-
-y = np.zeros(dd.prod())
-#W = psf(0,gamma, theta, s, d, dd, v) #funcao de espalhamento de ponto
+	return y.reshape(dd)
 
 
-for i in range(dd.prod()):
-	W = psf(i,gamma, theta, s, d, dd, v) #funcao de espalhamento de ponto
-	y[i] = np.dot(W,img)
-	print 100.0*i/dd.prod()
-	
-imgr = Image.fromarray(y.reshape(dd)).convert('RGB')
-imgr.save('res2.bmp')
+N = 30 #numero de imagens a serem geradas
+img = np.array(Image.open('../testIMG/imtestes.png').convert('L'))
+f = 0.9 # fator de subamostragem
+gamma = 4 # tamanho da funcao de espalhamento de ponto
+s = np.random.randn(2,N) #deslocamento da imagem
+theta = np.random.randn(N)*2*np.pi/100 #angulo de rotacao (com variancia de pi/100)
+
+for k in range(N):	
+	print k
+	y = degradaImagem(img,gamma,theta[k],s[:,k],f)
+	imgr = Image.fromarray(y).convert('RGB')
+	imgr.save('../resultIMG/result-'+str(k)+'.png')
+
+#imgr.save('res2.bmp')

@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt 
 from PIL import Image
 from IPython import embed
+import csv
 
 
 # function return vector of subscripts
@@ -50,18 +51,31 @@ def degradaImagem(img, gamma, theta, s, f):
 	return y.reshape(dd)
 
 
-N = 2 #numero de imagens a serem geradas
+N = 1 #numero de imagens a serem geradas
 img = np.array(Image.open('../testIMG/imtestes.png').convert('L'))
 f = 0.9 # fator de subamostragem
 gamma = 4 # tamanho da funcao de espalhamento de ponto
 s = np.random.randn(2,N) #deslocamento da imagem
 theta = np.random.randn(N)*2*np.pi/100 #angulo de rotacao (com variancia de pi/100)
+filename = []
 
 for k in range(N):	
 	print k
 	y = degradaImagem(img,gamma,theta[k],s[:,k],f)
 	imgr = Image.fromarray(y).convert('RGB')
-	imgr.save('../resultIMG/result-'+str(k)+'.png')
+	filename.append('result-'+str(k)+'.png')
+	imgr.save('../resultIMG/'+filename[k])
 
+#salva parametros em arquivo .csv
+with open('../resultIMG/praramsImage.csv', 'wb') as csvfile:
+	fields = ['filename','s','theta']
+	
+	plan = csv.DictWriter(csvfile, fieldnames=fields, delimiter=';')
+	plan.writeheader()
+	
+	for k in range(N):
+		plan.writerow({'filename':filename[k],
+			's':s[:,k],
+			'theta':theta[k]})
 #imgr.save('res2.bmp')
 

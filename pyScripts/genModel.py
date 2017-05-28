@@ -50,8 +50,10 @@ def degradaImagem(img, gamma, theta, s, f):
 
 	return y.reshape(dd)
 
+outFolder = '../degradedImg/' #diretorio de saida
+outFormat = '.bmp' #formato de saida
 
-N = 1 #numero de imagens a serem geradas
+N = 2 #numero de imagens a serem geradas
 img = np.array(Image.open('../testIMG/imtestes.png').convert('L'))
 f = 0.9 # fator de subamostragem
 gamma = 4 # tamanho da funcao de espalhamento de ponto
@@ -63,12 +65,12 @@ for k in range(N):
 	print k
 	y = degradaImagem(img,gamma,theta[k],s[:,k],f)
 	imgr = Image.fromarray(y).convert('RGB')
-	filename.append('result-'+str(k)+'.png')
-	imgr.save('../resultIMG/'+filename[k])
+	filename.append('result-'+str(k)+outFormat)
+	imgr.save(outFolder+filename[k])
 
 #salva parametros em arquivo .csv
-with open('../resultIMG/praramsImage.csv', 'wb') as csvfile:
-	fields = ['filename','s','theta']
+with open(outFolder + 'praramsImage.csv', 'wb') as csvfile:
+	fields = ['filename','s','theta', 'gamma', 'f']
 	
 	plan = csv.DictWriter(csvfile, fieldnames=fields, delimiter=';')
 	plan.writeheader()
@@ -76,6 +78,8 @@ with open('../resultIMG/praramsImage.csv', 'wb') as csvfile:
 	for k in range(N):
 		plan.writerow({'filename':filename[k],
 			's':s[:,k],
-			'theta':theta[k]})
+			'theta':theta[k],
+			'gamma': gamma,
+			'f': f})
 #imgr.save('res2.bmp')
 

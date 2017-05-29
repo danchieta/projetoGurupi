@@ -58,26 +58,26 @@ img = np.array(Image.open('../testIMG/imtestes.png').convert('L'))
 f = 0.9 # fator de subamostragem
 gamma = 4 # tamanho da funcao de espalhamento de ponto
 s = np.random.randn(2,N) #deslocamento da imagem
-theta = np.random.randn(N)*2*np.pi/100 #angulo de rotacao (com variancia de pi/100)
+theta = np.random.randn(N)*2*np.pi/360 #angulo de rotacao (com variancia de pi/100)
 filename = []
 
 for k in range(N):	
-	print k
 	y = degradaImagem(img,gamma,theta[k],s[:,k],f)
 	imgr = Image.fromarray(y).convert('RGB')
 	filename.append('result-'+str(k)+outFormat)
 	imgr.save(outFolder+filename[k])
 
 #salva parametros em arquivo .csv
-with open(outFolder + 'praramsImage.csv', 'wb') as csvfile:
-	fields = ['filename','s','theta', 'gamma', 'f']
+with open(outFolder + 'paramsImage.csv', 'wb') as csvfile:
+	fields = ['filename','sx','sy','theta', 'gamma', 'f']
 	
 	plan = csv.DictWriter(csvfile, fieldnames=fields, delimiter=';')
 	plan.writeheader()
 	
 	for k in range(N):
 		plan.writerow({'filename':filename[k],
-			's':s[:,k],
+			'sx':s[0,k],
+			'sy':s[1,k],
 			'theta':theta[k],
 			'gamma': gamma,
 			'f': f})

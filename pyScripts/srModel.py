@@ -9,29 +9,27 @@ def vecOfSub(shp):
 	y = np.reshape(y,(1,y.size),order='f').squeeze()
 	return np.array([x,y])
 
-def priorDist(shapei, A = 1, r = 1):
-	#retorna matriz de covariancia de distribuicao a priori para imagem HR
+def priorDist(shapei, A=0.04, r=1):
 
-	vec_i = np.float16(vecOfSub(shapei))
+	vec_i = vecOfSub(shapei)
+	vec_i = np.complex64(vec_i[0] + vec_i[1]*1j)
 
-	Z = np.array([
-		np.meshgrid(vec_i[0],vec_i[0])[0] - np.meshgrid(vec_i[0],vec_i[0])[1],
-		np.meshgrid(vec_i[1],vec_i[1])[0] - np.meshgrid(vec_i[1],vec_i[1])[1],
-		]).astype(np.float16)
+	Z = np.meshgrid(vec_i, vec_i)
+	Z = np.abs(Z[0] - Z[1]).astype(np.float16)
 
-	return sparse.csc_matrix(A*np.exp(-(np.linalg.norm(Z, axis=0)**2.)/r**2.))
+	return sparse.csc_matrix(A*np.exp(-(Z**2.)/r**2.))
 
-d_in  = (20,20)
-Z = priorDist(d_in, A = 0.04, r=1.0)
-
-plt.spy(Z)
-plt.show()
+def priorDist()
 
 
 
+d_in  = (100,150)
+
+Z = priorDist(d_in, A = 0.04)
 
 
-
+#plt.spy(Z)
+#plt.show()
 
 # inFolder = '../degradedImg/' #diretorio de saida
 
@@ -48,4 +46,3 @@ plt.show()
 
 # plt.spy(Z)
 # plt.show()
-

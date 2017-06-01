@@ -1,5 +1,6 @@
-import numpy as np
+#este modulo contem as funcoes referentes ao modelo de observacao
 
+import numpy as np
 
 # function return vector of subscripts
 def vecOfSub(shp):

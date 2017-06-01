@@ -9,19 +9,10 @@ def vecOfSub(shp):
 	y = np.reshape(y,(1,y.size),order='f').squeeze()
 	return np.array([x,y])
 
-def priorDist(shapei, A=0.04, r=1):
-
-	vec_i = vecOfSub(shapei)
-	vec_i = np.complex64(vec_i[0] + vec_i[1]*1j)
-
-	Z = np.meshgrid(vec_i, vec_i)
-	Z = np.abs(Z[0] - Z[1]).astype(np.float16)
-
-	return Z
-
-def priorDistT(shapei, A = 0.04, r=1):
+def priorDist(shapei, A = 0.04, r=1):
+	# gera matriz de covariancia para funcao de probabilidade a priori da imagem HR
+	# a ser estimada.
 	vec_i = np.float16(vecOfSub(shapei))
-
 	Z = np.array([vec_i[0][np.newaxis].T - vec_i[0],
 		vec_i[1][np.newaxis].T - vec_i[1]])
 	Z = np.linalg.norm(Z,axis=0)
@@ -32,9 +23,7 @@ def priorDistT(shapei, A = 0.04, r=1):
 
 d_in  = (150,104)
 
-#Z = priorDist(d_in)
-
-Z2 = priorDistT(d_in)
+Z2 = priorDist(d_in)
 
 
 #plt.spy(Z)

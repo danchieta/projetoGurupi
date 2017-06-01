@@ -17,15 +17,24 @@ def priorDist(shapei, A=0.04, r=1):
 	Z = np.meshgrid(vec_i, vec_i)
 	Z = np.abs(Z[0] - Z[1]).astype(np.float16)
 
-	return sparse.csc_matrix(A*np.exp(-(Z**2.)/r**2.))
+	return Z
 
-def priorDist()
+def priorDistT(shapei, A = 0.04, r=1):
+	vec_i = np.float16(vecOfSub(shapei))
+
+	Z = np.array([vec_i[0][np.newaxis].T - vec_i[0],
+		vec_i[1][np.newaxis].T - vec_i[1]])
+	Z = np.linalg.norm(Z,axis=0)
+	Z = A*np.exp(-Z**2/r**2)
+
+	return Z
 
 
+d_in  = (150,104)
 
-d_in  = (100,150)
+#Z = priorDist(d_in)
 
-Z = priorDist(d_in, A = 0.04)
+Z2 = priorDistT(d_in)
 
 
 #plt.spy(Z)

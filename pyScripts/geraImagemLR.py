@@ -8,7 +8,7 @@ outFormat = '.bmp' #formato de saida
 
 N = 2 #numero de imagens a serem 
 img = np.array(Image.open('../testIMG/imtestes.png').convert('L')) #abre imagem a ser degradada
-f = 0.9 # fator de subamostragem
+f = 0.25 # fator de subamostragem
 gamma = 4 # tamanho da funcao de espalhamento de ponto
 s = np.random.randn(2,N) #deslocamento da imagem
 theta = np.random.randn(N)*2*np.pi/360 #angulo de rotacao (com variancia de pi/100)

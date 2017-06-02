@@ -4,6 +4,13 @@ import numpy as np
 from scipy import sparse
 
 # function return vector of subscripts
+def decimate(shapei, shapeo):
+	x,y = np.meshgrid(np.linspace(0,shapei[0], shapeo[0]),
+		np.linspace(0,shapei[1], shapeo[1]))
+	x = np.reshape(x,(1,x.size),order='f').squeeze()
+	y = np.reshape(y,(1,y.size),order='f').squeeze()
+	return np.array([x,y])
+
 def vecOfSub(shp):
 	x,y = np.meshgrid(range(shp[0]),range(shp[1]))
 	x = np.reshape(x,(1,x.size),order='f').squeeze()
@@ -19,7 +26,7 @@ def psf(gamma, theta, s, shapei, shapeo, v):
 	R = np.array([[np.cos(theta) , np.sin(theta)],[-np.sin(theta), np.cos(theta)]]) 
 
 	#Vetores de subscritos das imagens de saida e entrada
-	vec_j = vecOfSub(shapeo).astype(np.float16)
+	vec_j = decimate(shapei,shapeo)
 	vec_i = vecOfSub(shapei).astype(np.float16)
 	
 	v = v.reshape(2,1) #centro da imagem como vetor coluna

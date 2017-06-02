@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
 from scipy import sparse
+import genModel
 
 def vecOfSub(shp):
 	x,y = np.meshgrid(range(shp[0]),range(shp[1]))
@@ -19,6 +20,13 @@ def priorDist(shapei, A = 0.04, r=1):
 	Z = A*np.exp(-Z**2/r**2)
 
 	return Z
+	
+def getSigma(shapei, s, theta, gamma, beta, A = 0.04, r = 1):
+	
+	Sigma = priorDist(shapei)
+	
+	for k in range(theta.size):
+		Sigma += 
 
 
 d_in  = (150,104)

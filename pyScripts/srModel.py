@@ -4,16 +4,10 @@ from PIL import Image
 from scipy import sparse
 import genModel
 
-def vecOfSub(shp):
-	x,y = np.meshgrid(range(shp[0]),range(shp[1]))
-	x = np.reshape(x,(1,x.size),order='f').squeeze()
-	y = np.reshape(y,(1,y.size),order='f').squeeze()
-	return np.array([x,y])
-
 def priorDist(shapei, A = 0.04, r=1):
 	# gera matriz de covariancia para funcao de probabilidade a priori da imagem HR
 	# a ser estimada.
-	vec_i = np.float16(vecOfSub(shapei))
+	vec_i = np.float16(genModel.vecOfSub(shapei))
 	Z = np.array([vec_i[0][np.newaxis].T - vec_i[0],
 		vec_i[1][np.newaxis].T - vec_i[1]])
 	Z = np.linalg.norm(Z,axis=0)
@@ -21,18 +15,11 @@ def priorDist(shapei, A = 0.04, r=1):
 
 	return Z
 	
-def getSigma(shapei, s, theta, gamma, beta, A = 0.04, r = 1):
-	
-	Sigma = priorDist(shapei)
-	
-	for k in range(theta.size):
-		Sigma += 
+def charque():
+	a = "tomate"
 
-
-d_in  = (150,104)
-
-Z2 = priorDist(d_in)
-
+charque()
+print a
 
 #plt.spy(Z)
 #plt.show()

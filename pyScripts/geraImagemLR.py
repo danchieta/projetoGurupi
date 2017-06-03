@@ -38,3 +38,15 @@ with open(outFolder + 'paramsImage.csv', 'wb') as csvfile:
 			'theta':theta[k],
 			'gamma': gamma,
 			'f': f})
+
+with open(outFolder + 'globalParams.csv', 'wb') as csvfile:
+	fields = ['shapei0', 'shapei1', 'f','gamma', 'N']
+	
+	plan = csv.DictWriter(csvfile, fieldnames=fields, delimiter=';')
+	plan.writeheader()
+	
+	plan.writerow({'shapei0':img.shape[0],
+		'shapei1': img.shape[1],
+		'f':f,
+		'gamma':2,
+		'N':N})

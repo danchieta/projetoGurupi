@@ -5,6 +5,18 @@ from scipy import sparse
 import scipy.sparse.linalg 
 import genModel
 
+def getWList(gamma, theta, s, shapei, f):
+	shapeo = np.round(shapei*f).astype('int')
+	v = (shapei/2.0) #centro da imagem 
+
+	W = []
+
+	for k in range(N):
+		W.append(genModel.psf(gamma, theta[k], s[:,k], shapei, shapeo, v))
+
+	return W
+
+
 def getImgVec(filename):
 	img = np.array(Image.open(inFolder + filename).convert('L'))
 	d = np.array(img.shape)
@@ -12,7 +24,7 @@ def getImgVec(filename):
 
 def readCSV(filename1, filename2):
 	filename = np.genfromtxt(filename1, dtype=str, skip_header = 1, usecols = 0, delimiter = ';' ).tolist()
-	s = np.genfromtxt(filename1, skip_header = 1, usecols = [1,2], delimiter = ';' )
+	s = np.genfromtxt(filename1, skip_header = 1, usecols = [1,2], delimiter = ';' ).T
 	theta = np.genfromtxt(filename1, skip_header = 1, usecols = 3, delimiter = ';' )
 
 	shapei = np.genfromtxt(filename2, skip_header = 1, usecols = [0,1], delimiter = ';' ).astype(int)
@@ -34,34 +46,26 @@ def priorDist(shapei, A = 0.04, r=1):
 
 	return sparse.csc_matrix(Z)
 
-def getSigma(Z, beta, gamma, theta, s, shapei, f):
-	shapeo = np.round(shapei*f).astype('int')
-	v = (shapei/2.0) #centro da imagem 
+def getSigma(W, Z, beta):
 	Sigma = Z
 
 	print 'N: ' + str(N)
 	for k in range(N):
 		print 'iteration: ' + str(k)
-		W = genModel.psf(gamma, theta[k], s[:,k], shapei, shapeo, v)
-		Sigma = Sigma + beta*(W.T*W)
+		Sigma = Sigma + beta*(W[k].T*W)
 
 	return Sigma
 
-def getMu(filename, Sigma, beta, gamma, theta, s, shapei,f):
-	shapeo = np.round(shapei*f).astype('int')
-	v = (shapei/2.0) #centro da imagem 
+def getMu(W, filename, Sigma, beta, shapei):
 	mu = sparse.csc_matrix(np.zeros((shapei.prod(),1)))
 
 	for k in range(N):
 		print 'iteration: ' + str(k)
 		y = sparse.csc_matrix(getImgVec(filename[k]))
-		W = genModel.psf(gamma, theta[k], s[:,k], shapei, shapeo, v)
-		mu = mu + W.T*y
+		mu = mu + W[k].T*y
 	return beta*(Sigma*mu)
 
 def getloglikelihood(filename, Sigma, mu, beta, gamma, theta, s, shapei,f):
-	shapeo = np.round(shapei*f).astype('int')
-	v = (shapei/2.0) #centro da imagem 
 	M = shapeo.prod()
 
 	L = mu.T*np.linalg.inv(Z_x.toarray())*mu
@@ -74,14 +78,17 @@ csv2 = 'globalParams.csv'
 
 filename,s,theta,shapei,beta,f,gamma,N = readCSV(inFolder+csv1, inFolder+csv2)
 
+print 'calculando psfs'
+W = getWList(gamma, theta, s, shapei, f)
+
 print 'calculando covariancia a priori'
 Z_x = priorDist(shapei)
 
 print 'calculando Sigma'
-Sigma = getSigma(Z_x, beta, gamma, theta, s, shapei, f)
+Sigma = getSigma(W, Z_x, beta)
 
 print 'calculando mu'
-mu = getMu(filename, Sigma, beta, gamma, theta, s, shapei,f)
+mu = getMu(W, filename, Sigma, beta, shapei)
 
 print 'calculando L'
 L = getloglikelihood(filename, Sigma, mu, beta, gamma, theta, s, shapei,f)

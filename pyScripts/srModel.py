@@ -44,7 +44,8 @@ def priorDist(shapei, A = 0.04, r=1):
 	Z = np.linalg.norm(Z,axis=0)
 	Z = A*np.exp(-Z**2/r**2)
 
-	return sparse.csc_matrix(Z)
+	sign, detZ = np.linalg.slogdet(Z.astype(np.float32))
+	return sparse.csc_matrix(Z), detZ/np.log(10.0)
 
 def getSigma(W, Z, beta):
 	Sigma = Z
@@ -54,7 +55,9 @@ def getSigma(W, Z, beta):
 		print 'iteration: ' + str(k)
 		Sigma = Sigma + beta*(W[k].T*W[k])
 
-	return Sigma
+	sign, detSigma = np.linalg.slogdet(Sigma.toarray().astype(np.float32))
+
+	return Sigma, detSigma/np.log(10.0)
 
 def getMu(W, filename, Sigma, beta, shapei):
 	mu = sparse.csc_matrix(np.zeros((shapei.prod(),1)))
@@ -65,18 +68,18 @@ def getMu(W, filename, Sigma, beta, shapei):
 		mu = mu + W[k].T*y
 	return beta*(Sigma*mu)
 
-def getloglikelihood(filename, Sigma, mu, beta, shapei,f):
+def getloglikelihood(filename, Sigma, mu, beta, shapei, f, logDetZ, logDetSigma):
 	M = np.round(shapei*f).prod()
 	L = mu.T*np.linalg.inv(Z_x.toarray())*mu
-	#L = L + np.log10(np.linalg.det(Z_x.toarray()))
-	L = L - np.log10(np.linalg.det(Sigma.toarray()))
+	L = L + logDetZ
+	L = L - logDetSigma
 	L = L - N*M*np.log10(beta)
 
 	for k in range(N):
+		print 'iteration: ' + str(k) + '/' + str(N)
 		y = getImgVec(filename[k])
 		L = L + beta*np.linalg.norm(y - (W[k]*mu).toarray())**2
-	return L
-
+	return -L/2
 
 inFolder = '../degradedImg/'
 csv1 = 'paramsImage.csv'
@@ -84,22 +87,22 @@ csv2 = 'globalParams.csv'
 
 filename,s_true,theta_true,shapei,beta,f,gamma_true,N = readCSV(inFolder+csv1, inFolder+csv2)
 
-gamma = 1
-s = np.array([[3,4],[4,3]])
+gamma = 2
+s = s_true
 theta = np.array([4,4])*np.pi/180
 
 print 'calculando psfs'
 W = getWList(gamma, theta, s, shapei, f)
 
 print 'calculando covariancia a priori'
-Z_x = priorDist(shapei)
+Z_x, logDetZ = priorDist(shapei)
 
 print 'calculando Sigma'
-Sigma = getSigma(W, Z_x, beta)
+Sigma, logDetSigma = getSigma(W, Z_x, beta)
 
-# print 'calculando mu'
-# mu = getMu(W, filename, Sigma, beta, shapei)
+print 'calculando mu'
+mu = getMu(W, filename, Sigma, beta, shapei)
 
-# print 'calculando L'
-# L = getloglikelihood(filename, Sigma, mu, beta, shapei,f)
+print 'calculando L'
+L = getloglikelihood(filename, Sigma, mu, beta, shapei, f, logDetZ, logDetSigma)
 

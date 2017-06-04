@@ -52,7 +52,7 @@ def getSigma(W, Z, beta):
 	print 'N: ' + str(N)
 	for k in range(N):
 		print 'iteration: ' + str(k)
-		Sigma = Sigma + beta*(W[k].T*W)
+		Sigma = Sigma + beta*(W[k].T*W[k])
 
 	return Sigma
 
@@ -65,10 +65,16 @@ def getMu(W, filename, Sigma, beta, shapei):
 		mu = mu + W[k].T*y
 	return beta*(Sigma*mu)
 
-def getloglikelihood(filename, Sigma, mu, beta, gamma, theta, s, shapei,f):
-	M = shapeo.prod()
-
+def getloglikelihood(filename, Sigma, mu, beta, shapei,f):
+	M = np.round(shapei*f).prod()
 	L = mu.T*np.linalg.inv(Z_x.toarray())*mu
+	#L = L + np.log10(np.linalg.det(Z_x.toarray()))
+	L = L - np.log10(np.linalg.det(Sigma.toarray()))
+	L = L - N*M*np.log10(beta)
+
+	for k in range(N):
+		y = getImgVec(filename[k])
+		L = L + beta*np.linalg.norm(y - (W[k]*mu).toarray())**2
 	return L
 
 
@@ -76,7 +82,11 @@ inFolder = '../degradedImg/'
 csv1 = 'paramsImage.csv'
 csv2 = 'globalParams.csv'
 
-filename,s,theta,shapei,beta,f,gamma,N = readCSV(inFolder+csv1, inFolder+csv2)
+filename,s_true,theta_true,shapei,beta,f,gamma_true,N = readCSV(inFolder+csv1, inFolder+csv2)
+
+gamma = 1
+s = np.array([[3,4],[4,3]])
+theta = np.array([4,4])*np.pi/180
 
 print 'calculando psfs'
 W = getWList(gamma, theta, s, shapei, f)
@@ -87,9 +97,9 @@ Z_x = priorDist(shapei)
 print 'calculando Sigma'
 Sigma = getSigma(W, Z_x, beta)
 
-print 'calculando mu'
-mu = getMu(W, filename, Sigma, beta, shapei)
+# print 'calculando mu'
+# mu = getMu(W, filename, Sigma, beta, shapei)
 
-print 'calculando L'
-L = getloglikelihood(filename, Sigma, mu, beta, gamma, theta, s, shapei,f)
+# print 'calculando L'
+# L = getloglikelihood(filename, Sigma, mu, beta, shapei,f)
 

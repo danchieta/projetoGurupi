@@ -68,7 +68,10 @@ def getMu(W, filename, Sigma, beta, shapei):
 		mu = mu + W[k].T*y
 	return beta*(Sigma*mu)
 
-def getloglikelihood(filename, Sigma, mu, beta, shapei, f, logDetZ, logDetSigma):
+def getloglikelihood(filename, beta, shapei, f, gamma, s, theta):	
+	print 'calculando psfs'
+	W = getWList(gamma, theta, s, shapei, f)
+	
 	M = np.round(shapei*f).prod()
 	L = mu.T*np.linalg.inv(Z_x.toarray())*mu
 	L = L + logDetZ
@@ -91,11 +94,9 @@ gamma = 2
 s = s_true
 theta = np.array([4,4])*np.pi/180
 
+
 print 'calculando covariancia a priori'
 Z_x, invZ_x, logDetZ = priorDist(shapei)
-
-print 'calculando psfs'
-W = getWList(gamma, theta, s, shapei, f)
 
 print 'calculando Sigma'
 Sigma, logDetSigma = getSigma(W, invZ_x, beta)

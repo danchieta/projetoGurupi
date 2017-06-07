@@ -53,9 +53,9 @@ def getSigma(W, invZ, beta):
 	print 'N: ' + str(N)
 	for k in range(N):
 		print 'iteration: ' + str(k)
-		Sigma = Sigma + beta*(W[k].T*W[k])
+		Sigma = Sigma + beta*np.dot(W[k].T.toarray(),W[k].toarray())
 
-	sign, detSigma = np.linalg.slogdet(Sigma.toarray().astype(np.float32))
+	sign, detSigma = np.linalg.slogdet(Sigma.astype(np.float32))
 
 	return Sigma, detSigma/np.log(10.0)
 
@@ -78,7 +78,7 @@ def getloglikelihood(filename, Sigma, mu, beta, shapei, f, logDetZ, logDetSigma)
 	for k in range(N):
 		print 'iteration: ' + str(k) + '/' + str(N)
 		y = getImgVec(filename[k])
-		L = L + beta*np.linalg.norm(y - (W[k]*mu).toarray())**2
+		L = L + beta*np.linalg.norm(y - W[k]*mu)**2
 	return -L/2
 
 inFolder = '../degradedImg/'
@@ -105,4 +105,3 @@ mu = getMu(W, filename, Sigma, beta, shapei)
 
 print 'calculando L'
 L = getloglikelihood(filename, Sigma, mu, beta, shapei, f, logDetZ, logDetSigma)
-

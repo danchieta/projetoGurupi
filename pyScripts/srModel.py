@@ -45,10 +45,10 @@ def priorDist(shapei, A = 0.04, r=1):
 	Z = A*np.exp(-Z**2/r**2)
 
 	sign, detZ = np.linalg.slogdet(Z.astype(np.float32))
-	return sparse.csc_matrix(Z), detZ/np.log(10.0)
+	return sparse.csc_matrix(Z), sparse.csc_matrix(np.linalg.inv(Z.astype(np.float))), detZ/np.log(10.0)
 
-def getSigma(W, Z, beta):
-	Sigma = Z
+def getSigma(W, invZ, beta):
+	Sigma = invZ
 
 	print 'N: ' + str(N)
 	for k in range(N):
@@ -91,14 +91,14 @@ gamma = 2
 s = s_true
 theta = np.array([4,4])*np.pi/180
 
+print 'calculando covariancia a priori'
+Z_x, invZ_x, logDetZ = priorDist(shapei)
+
 print 'calculando psfs'
 W = getWList(gamma, theta, s, shapei, f)
 
-print 'calculando covariancia a priori'
-Z_x, logDetZ = priorDist(shapei)
-
 print 'calculando Sigma'
-Sigma, logDetSigma = getSigma(W, Z_x, beta)
+Sigma, logDetSigma = getSigma(W, invZ_x, beta)
 
 print 'calculando mu'
 mu = getMu(W, filename, Sigma, beta, shapei)

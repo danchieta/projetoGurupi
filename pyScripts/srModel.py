@@ -57,7 +57,7 @@ def getSigma(W, invZ, beta):
 
 	sign, detSigma = np.linalg.slogdet(Sigma.astype(np.float32))
 
-	return Sigma, detSigma/np.log(10.0)
+	return sparse.csc_matrix(Sigma), detSigma/np.log(10.0)
 
 def getMu(W, filename, Sigma, beta, shapei):
 	mu = sparse.csc_matrix(np.zeros((shapei.prod(),1)))
@@ -70,7 +70,7 @@ def getMu(W, filename, Sigma, beta, shapei):
 
 def getloglikelihood(filename, Sigma, mu, beta, shapei, f, logDetZ, logDetSigma):
 	M = np.round(shapei*f).prod()
-	L = mu.T*np.linalg.inv(Z_x.toarray())*mu
+	L = np.dot(np.dot(mu.T.toarray(),invZ_x.toarray()),mu.toarray())
 	L = L + logDetZ
 	L = L - logDetSigma
 	L = L - N*M*np.log10(beta)
@@ -87,21 +87,27 @@ csv2 = 'globalParams.csv'
 
 filename,s_true,theta_true,shapei,beta,f,gamma_true,N = readCSV(inFolder+csv1, inFolder+csv2)
 
-gamma = 2
-s = s_true
-theta = np.array([4,4])*np.pi/180
-
 print 'calculando covariancia a priori'
 Z_x, invZ_x, logDetZ = priorDist(shapei)
 
-print 'calculando psfs'
-W = getWList(gamma, theta, s, shapei, f)
+gamma = [0,1,2,3,4]
+s = s_true
+theta = theta_true
 
-print 'calculando Sigma'
-Sigma, logDetSigma = getSigma(W, invZ_x, beta)
+likelihood = []
 
-print 'calculando mu'
-mu = getMu(W, filename, Sigma, beta, shapei)
+for k in range(np.size(gamma)):
+	print 'start iteration: ', k+1
+	print 'calculando psfs'
+	W = getWList(gamma[k], theta, s, shapei, f)
 
-print 'calculando L'
-L = getloglikelihood(filename, Sigma, mu, beta, shapei, f, logDetZ, logDetSigma)
+	print 'calculando Sigma'
+	Sigma, logDetSigma = getSigma(W, invZ_x, beta)
+
+	print 'calculando mu'
+	mu = getMu(W, filename, Sigma, beta, shapei)
+
+	print 'calculando L'
+	L = getloglikelihood(filename, Sigma, mu, beta, shapei, f, logDetZ, logDetSigma)
+
+	likelihood.append(L)

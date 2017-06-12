@@ -6,7 +6,7 @@ from genModel import *
 outFolder = '../degradedImg/' #diretorio de saida
 outFormat = '.bmp' #formato de saida
 
-N = 2 #numero de imagens a serem 
+N = 10 #numero de imagens a serem 
 img = np.array(Image.open('../testIMG/imtestes.png').convert('L')) #abre imagem a ser degradada
 f = 0.25 # fator de subamostragem
 gamma = 2 # tamanho da funcao de espalhamento de ponto

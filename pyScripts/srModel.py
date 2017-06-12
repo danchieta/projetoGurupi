@@ -1,21 +1,8 @@
 import numpy as np
-import matplotlib.pyplot as plt
 from PIL import Image
 from scipy import sparse
 import scipy.sparse.linalg 
 import genModel
-
-def getWList(gamma, theta, s, shapei, f):
-	shapeo = np.round(shapei*f).astype('int')
-	v = (shapei/2.0) #centro da imagem 
-
-	W = []
-
-	for k in range(N):
-		W.append(genModel.psf(gamma, theta[k], s[:,k], shapei, shapeo, v))
-
-	return W
-
 
 def getImgVec(filename):
 	img = np.array(Image.open(inFolder + filename).convert('L'))
@@ -27,52 +14,60 @@ def readCSV(filename1, filename2):
 	s = np.genfromtxt(filename1, skip_header = 1, usecols = [1,2], delimiter = ';' ).T
 	theta = np.genfromtxt(filename1, skip_header = 1, usecols = 3, delimiter = ';' )
 
-	shapei = np.genfromtxt(filename2, skip_header = 1, usecols = [0,1], delimiter = ';' ).astype(int)
+	shapeHR = np.genfromtxt(filename2, skip_header = 1, usecols = [0,1], delimiter = ';' ).astype(int)
 	beta = np.genfromtxt(filename2, skip_header = 1, usecols = 2, delimiter = ';' )
 	f = np.genfromtxt(filename2, skip_header = 1, usecols = 3, delimiter = ';' )
 	gamma = np.genfromtxt(filename2, skip_header = 1, usecols = 4, delimiter = ';' )
 	N = np.asscalar(np.genfromtxt(filename2, skip_header = 1, usecols = 5, delimiter = ';' ).astype(int))
 
-	return (filename,s,theta,shapei,beta,f,gamma,N)
+	return (filename,s,theta,shapeHR,beta,f,gamma,N)
 
-def priorDist(shapei, A = 0.04, r=1):
+def priorDist(shapeHR, A = 0.04, r=1):
 	# gera matriz de covariancia para funcao de probabilidade a priori da imagem HR
 	# a ser estimada.
-	vec_i = np.float16(genModel.vecOfSub(shapei))
+	print 'Computing covariance matrix of the prior distribution'
+	vec_i = np.float16(genModel.vecOfSub(shapeHR))
 	Z = np.array([vec_i[0][np.newaxis].T - vec_i[0],
 		vec_i[1][np.newaxis].T - vec_i[1]])
 	Z = np.linalg.norm(Z,axis=0)
 	Z = A*np.exp(-Z**2/r**2)
 
+	print '   Computing log determinant'
 	sign, detZ = np.linalg.slogdet(Z.astype(np.float32))
-	return sparse.csc_matrix(Z), sparse.csc_matrix(np.linalg.inv(Z.astype(np.float))), detZ/np.log(10.0)
+
+	print '   Computing inverse matrix'
+	invZ = sparse.csc_matrix(np.linalg.inv(Z.astype(np.float)))
+	return sparse.csc_matrix(Z), invZ, detZ/np.log(10.0)
 
 def getSigma(W, invZ, beta):
+	print 'Computing Sigma/covariance matrix of the posterior distribution'	
 	Sigma = invZ
 
 	print 'N: ' + str(N)
 	for k in range(N):
-		print '    iteration: ' + str(k)
+		print '    iteration: ', str(k+1), '/', str(N)
 		Sigma = Sigma + beta*np.dot(W[k].T.toarray(),W[k].toarray())
 
+	print '    Computing log determinant'
 	sign, detSigma = np.linalg.slogdet(Sigma.astype(np.float32))
 
 	return sparse.csc_matrix(Sigma), detSigma/np.log(10.0)
 
-def getMu(W, filename, Sigma, beta, shapei):
-	mu = sparse.csc_matrix(np.zeros((shapei.prod(),1)))
+def getMu(W, filename, Sigma, beta, shapeHR):
+	print 'Computing mu/mean vector of the posterior distribution'
+	mu = sparse.csc_matrix(np.zeros((shapeHR.prod(),1)))
 
 	for k in range(N):
 		print '    iteration: ' + str(k)
 		y = sparse.csc_matrix(getImgVec(filename[k]))
 		mu = mu + W[k].T*y
+
 	return beta*(Sigma*mu)
 
-def getloglikelihood(filename, beta, shapei, f, gamma, s, theta):	
-	print 'calculando psfs'
-	W = getWList(gamma, theta, s, shapei, f)
+def getloglikelihood(filename, beta, shapeHR, f, gamma, s, theta):
+	print 'Computing L/log likelihood function'
 	
-	M = np.round(shapei*f).prod()
+	M = np.round(shapeHR*f).prod()
 	L = np.dot(np.dot(mu.T.toarray(),invZ_x.toarray()),mu.toarray())
 	L = L + logDetZ
 	L = L - logDetSigma
@@ -84,34 +79,21 @@ def getloglikelihood(filename, beta, shapei, f, gamma, s, theta):
 		L = L + beta*np.linalg.norm(y - W[k]*mu)**2
 	return -L[0,0]/2
 
-inFolder = '../degradedImg/'
-csv1 = 'paramsImage.csv'
-csv2 = 'globalParams.csv'
+class Estimator:
+	def setWList(self,gamma, theta, s, shapeHR, f):
+		# gera matriz do sistema (funao espalhamento de ponto) para cara imagem
+		# para os parametros fornecidos
+		print 'Computing W matrices'
+		shapeLR = np.round(shapeHR*f).astype('int')
+		v = (shapeHR/2.0) #centro da imagem 
+		self.W = []
 
-filename,s_true,theta_true,shapei,beta,f,gamma_true,N = readCSV(inFolder+csv1, inFolder+csv2)
+		for k in range(N):
+			print '    iteration: ', str(k+1), '/', str(N)
+			self.W.append(genModel.psf(gamma, theta[k], s[:,k], shapeHR, shapeLR, v))
 
-print 'calculando covariancia a priori'
-Z_x, invZ_x, logDetZ = priorDist(shapei)
+class LikelihoodFunction:
 
-gamma = gamma_true
-s = [np.random.rand(2,N)*10-5, s_true, np.random.rand(2,N)*10-5, np.random.rand(2,N)*10-5]
-theta = [(np.random.rand(N)*16-8)*np.pi/180, theta_true, (np.random.rand(N)*16-8)*np.pi/180,(np.random.rand(N)*16-8)*np.pi/180]
+	def __init__(self, W, beta, shapeHR, A = 0.04, r = 1):
+		self.Z_x = priorDist(shapeHR, A, r)
 
-likelihood = []
-
-for k in range(4):
-	print 'start iteration: ', k+1
-	print 'calculando psfs'
-	W = getWList(gamma, theta[k], s[k], shapei, f)
-
-	print 'calculando Sigma'
-	Sigma, logDetSigma = getSigma(W, invZ_x, beta)
-
-	print 'calculando mu'
-	mu = getMu(W, filename, Sigma, beta, shapei)
-
-	print 'calculando L'
-	L = getloglikelihood(filename, Sigma, mu, beta, shapei, f, logDetZ, logDetSigma)
-
-	del W,Sigma,mu
-	likelihood.append(L)

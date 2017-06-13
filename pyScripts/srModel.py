@@ -4,6 +4,15 @@ from scipy import sparse
 import scipy.sparse.linalg 
 import genModel
 
+def getWList(imageData, gamma, theta, s):
+	shapei = imageData.shapeHR
+	shapeo = np.round(shapei*imageData.f).astype('int')
+	v = (shapei/2.0) #centro da imagem 
+	W = []
+	for k in range(imageData.N):
+		W.append(genModel.psf(gamma, theta[k], s[:,k], shapei, shapeo, v))
+	return W
+
 def priorDist(shapeHR, A = 0.04, r=1):
 	# gera matriz de covariancia para funcao de probabilidade a priori da imagem HR
 	# a ser estimada.
@@ -19,9 +28,9 @@ def priorDist(shapeHR, A = 0.04, r=1):
 
 	print '   Computing inverse matrix'
 	invZ = sparse.csc_matrix(np.linalg.inv(Z.astype(np.float)))
-	return sparse.csc_matrix(Z), invZ, detZ/np.log(10.0)
+	return invZ, detZ/np.log(10.0)
 
-def getSigma(W, invZ, beta):
+def getSigma(W, invZ, beta, N):
 	print 'Computing Sigma/covariance matrix of the posterior distribution'	
 	Sigma = invZ
 
@@ -35,44 +44,49 @@ def getSigma(W, invZ, beta):
 
 	return sparse.csc_matrix(Sigma), detSigma/np.log(10.0)
 
-def getMu(W, filename, Sigma, beta, shapeHR):
+def getMu(W, imageData, Sigma):
 	print 'Computing mu/mean vector of the posterior distribution'
-	mu = sparse.csc_matrix(np.zeros((shapeHR.prod(),1)))
+	mu = sparse.csc_matrix(np.zeros((imageData.shapeHR.prod(),1)))
 
-	for k in range(N):
+	for k in range(imageData.N):
 		print '    iteration: ' + str(k)
-		y = sparse.csc_matrix(getImgVec(filename[k]))
+		y = sparse.csc_matrix(imageData.getImgVec(k))
 		mu = mu + W[k].T*y
 
-	return beta*(Sigma*mu)
+	return imageData.beta*(Sigma*mu)
 
-def getloglikelihood(filename, beta, shapeHR, f, gamma, s, theta):
+def getloglikelihood(imageData, logDetSigma, W, invZ_x, logDetZ, mu):
 	print 'Computing L/log likelihood function'
 	
-	M = np.round(shapeHR*f).prod()
+	beta = imageData.beta
+	M = np.round(imageData.shapeHR*imageData.f).prod()
 	L = np.dot(np.dot(mu.T.toarray(),invZ_x.toarray()),mu.toarray())
 	L = L + logDetZ
 	L = L - logDetSigma
-	L = L - N*M*np.log10(beta)
+	L = L - imageData.N*M*np.log10(imageData.beta)
 
-	for k in range(N):
-		print '    iteration: ' + str(k+1) + '/' + str(N)
-		y = getImgVec(filename[k])
+	for k in range(imageData.N):
+		print '    iteration: ' + str(k+1) + '/' + str(imageData.N)
+		y = imageData.getImgVec(k)
 		L = L + beta*np.linalg.norm(y - W[k]*mu)**2
 	return -L[0,0]/2
 
 class Estimator:
-	def setWList(self,gamma, theta, s, shapeHR, f):
-		# gera matriz do sistema (funao espalhamento de ponto) para cara imagem
-		# para os parametros fornecidos
-		print 'Computing W matrices'
-		shapeLR = np.round(shapeHR*f).astype('int')
-		v = (shapeHR/2.0) #centro da imagem 
-		self.W = []
+	def __init__(self, imageData, A = 0.04, r=1):
+		self.L = []
+		self.imageData = imageData
+		self.invZ_x, self.logDetZ_x = priorDist(self.imageData.shapeHR, A, r)
 
-		for k in range(N):
-			print '    iteration: ', str(k+1), '/', str(N)
-			self.W.append(genModel.psf(gamma, theta[k], s[:,k], shapeHR, shapeLR, v))
+	def likelihood(self, gamma, theta, s):
+		W = getWList(self.imageData, gamma, theta, s)
+		Sigma, logDetSigma = getSigma(W, self.invZ_x, self.imageData.beta, self.imageData.N)
+		mu = getMu(W, self.imageData, Sigma)
+		del Sigma
+		L = getloglikelihood(self.imageData, logDetSigma, W, self.invZ_x, self.logDetZ_x, mu)
+		self.L.append(L)
+
+		return L
+
 
 class Data:
 	def __init__(self,inFolder,csvfile1, csvfile2):

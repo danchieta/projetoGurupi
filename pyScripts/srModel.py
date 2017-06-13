@@ -4,24 +4,6 @@ from scipy import sparse
 import scipy.sparse.linalg 
 import genModel
 
-def getImgVec(filename):
-	img = np.array(Image.open(inFolder + filename).convert('L'))
-	d = np.array(img.shape)
-	return img.reshape(d.prod(),1)
-
-def readCSV(filename1, filename2):
-	filename = np.genfromtxt(filename1, dtype=str, skip_header = 1, usecols = 0, delimiter = ';' ).tolist()
-	s = np.genfromtxt(filename1, skip_header = 1, usecols = [1,2], delimiter = ';' ).T
-	theta = np.genfromtxt(filename1, skip_header = 1, usecols = 3, delimiter = ';' )
-
-	shapeHR = np.genfromtxt(filename2, skip_header = 1, usecols = [0,1], delimiter = ';' ).astype(int)
-	beta = np.genfromtxt(filename2, skip_header = 1, usecols = 2, delimiter = ';' )
-	f = np.genfromtxt(filename2, skip_header = 1, usecols = 3, delimiter = ';' )
-	gamma = np.genfromtxt(filename2, skip_header = 1, usecols = 4, delimiter = ';' )
-	N = np.asscalar(np.genfromtxt(filename2, skip_header = 1, usecols = 5, delimiter = ';' ).astype(int))
-
-	return (filename,s,theta,shapeHR,beta,f,gamma,N)
-
 def priorDist(shapeHR, A = 0.04, r=1):
 	# gera matriz de covariancia para funcao de probabilidade a priori da imagem HR
 	# a ser estimada.
@@ -92,8 +74,22 @@ class Estimator:
 			print '    iteration: ', str(k+1), '/', str(N)
 			self.W.append(genModel.psf(gamma, theta[k], s[:,k], shapeHR, shapeLR, v))
 
-class LikelihoodFunction:
+class Data:
+	def __init__(self,inFolder,csvfile1, csvfile2):
+		self.inFolder = inFolder
+		filename1 = inFolder + csvfile1
+		filename2 = inFolder + csvfile2
+		self.filename = np.genfromtxt(filename1, dtype=str, skip_header = 1, usecols = 0, delimiter = ';' ).tolist()
+		self.s = np.genfromtxt(filename1, skip_header = 1, usecols = [1,2], delimiter = ';' ).T
+		self.theta = np.genfromtxt(filename1, skip_header = 1, usecols = 3, delimiter = ';' )
 
-	def __init__(self, W, beta, shapeHR, A = 0.04, r = 1):
-		self.Z_x = priorDist(shapeHR, A, r)
+		self.shapeHR = np.genfromtxt(filename2, skip_header = 1, usecols = [0,1], delimiter = ';' ).astype(int)
+		self.beta = np.genfromtxt(filename2, skip_header = 1, usecols = 2, delimiter = ';' )
+		self.f = np.genfromtxt(filename2, skip_header = 1, usecols = 3, delimiter = ';' )
+		self.gamma = np.genfromtxt(filename2, skip_header = 1, usecols = 4, delimiter = ';' )
+		self.N = np.asscalar(np.genfromtxt(filename2, skip_header = 1, usecols = 5, delimiter = ';' ).astype(int))
 
+	def getImgVec(self, index):
+		img = np.array(Image.open(self.inFolder + self.filename[index]).convert('L'))
+		d = np.array(img.shape)
+		return img.reshape(d.prod(),1)

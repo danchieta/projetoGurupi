@@ -34,9 +34,8 @@ def getSigma(W, invZ, beta, N):
 	print 'Computing Sigma/covariance matrix of the posterior distribution'	
 	Sigma = invZ
 
-	print 'N: ' + str(N)
 	for k in range(N):
-		print '    iteration: ', str(k+1), '/', str(N)
+		print '    iteration: ' + str(k+1) + '/' + str(N)
 		Sigma = Sigma + beta*np.dot(W[k].T.toarray(),W[k].toarray())
 
 	print '    Computing log determinant'
@@ -49,7 +48,7 @@ def getMu(W, imageData, Sigma):
 	mu = sparse.csc_matrix(np.zeros((imageData.shapeHR.prod(),1)))
 
 	for k in range(imageData.N):
-		print '    iteration: ' + str(k)
+		print '    iteration: ' + str(k+1) + '/' + str(imageData.N)
 		y = sparse.csc_matrix(imageData.getImgVec(k))
 		mu = mu + W[k].T*y
 

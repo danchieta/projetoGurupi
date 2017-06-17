@@ -4,6 +4,17 @@ from scipy import sparse
 import scipy.sparse.linalg 
 import genModel
 
+def sub2ind(shape, vecOS):
+	#converte vetor de subscritos para vetor de indices
+	ind = []
+	for i in range(vecOS.shape[1]):
+		ind.append(vecOS[0,i]*shape[0]+vecOS[1,i])
+	return np.array(ind)
+
+def getVecL(shapeHR, shapeL):
+	V = genModel.vecOfSub(shapeL) + np.array(shapeHR)[np.newaxis].T/2 - np.array(shapeL)[np.newaxis].T/2
+	return V
+
 def getWList(imageData, gamma, theta, s):
 	shapei = imageData.shapeHR
 	shapeo = np.round(shapei*imageData.f).astype('int')
@@ -13,11 +24,15 @@ def getWList(imageData, gamma, theta, s):
 		W.append(genModel.psf(gamma, theta[k], s[:,k], shapei, shapeo, v))
 	return W
 
-def priorDist(shapeHR, A = 0.04, r=1):
+def priorDist(shapeHR, windowSizeL = None, A = 0.04, r=1):
 	# gera matriz de covariancia para funcao de probabilidade a priori da imagem HR
 	# a ser estimada.
+	if windowSizeL == None:
+		vec_i = np.float16(genModel.vecOfSub(shapeHR))
+	else:
+		vec_i = getVecL(shapeHR, windowSizeL)
+
 	print 'Computing covariance matrix of the prior distribution'
-	vec_i = np.float16(genModel.vecOfSub(shapeHR))
 	Z = np.array([vec_i[0][np.newaxis].T - vec_i[0],
 		vec_i[1][np.newaxis].T - vec_i[1]])
 	Z = np.linalg.norm(Z,axis=0)
@@ -71,10 +86,20 @@ def getloglikelihood(imageData, logDetSigma, W, invZ_x, logDetZ, mu):
 	return -L[0,0]/2
 
 class Estimator:
-	def __init__(self, imageData, A = 0.04, r=1):
+	def __init__(self, imageData, windowSizeL = None, A = 0.04, r=1):
 		self.L = []
 		self.imageData = imageData
-		self.invZ_x, self.logDetZ_x = priorDist(self.imageData.shapeHR, A, r)
+
+		if windowSizeL == None:
+			# if no window is provided the prior will use the whole image size
+			self.windowSizeL = imageData.shapeLR
+			self.windowSizeH = imageData.shapeHR
+		else:
+			# if a windows is provided, the prior will use just pixels on the center of the image
+			self.windowSizeL = windowSizeL
+			self.windowSizeH = np.divide(windowSizeL,imageData.f)
+
+		self.invZ_x, self.logDetZ_x = priorDist(self.imageData.shapeHR, self.windowSizeH, A, r)
 
 	def likelihood(self, gamma, theta, s):
 		W = getWList(self.imageData, gamma, theta, s)
@@ -101,7 +126,7 @@ class Data:
 		self.f = np.genfromtxt(filename2, skip_header = 1, usecols = 3, delimiter = ';' )
 		self.gamma = np.genfromtxt(filename2, skip_header = 1, usecols = 4, delimiter = ';' )
 		self.N = np.asscalar(np.genfromtxt(filename2, skip_header = 1, usecols = 5, delimiter = ';' ).astype(int))
-
+		self.shapeLR = Image.open(self.inFolder + self.filename[0]).size
 	def getImgVec(self, index):
 		img = np.array(Image.open(self.inFolder + self.filename[index]).convert('L'))
 		d = np.array(img.shape)

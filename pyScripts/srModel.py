@@ -110,10 +110,10 @@ class Data:
 		if not self.windowed:
 			return img.reshape(img.size,1)
 		else:
-			upperCorner = np.floor([0,0] - np.divide(self.windowShapeLR,2) +np.divide(img.shape,2))
-			lowerCorner = np.floor(np.array(self.windowShapeLR) - np.divide(self.windowShapeLR,2) +np.divide(img.shape,2))
+			upperCorner = (np.zeros(2) - np.array(self.windowShapeLR)/2.0 + np.array(img.shape)/2.0).astype(int)
+			lowerCorner = upperCorner + np.array(self.windowShapeLR)
 			window = img[upperCorner[0]:lowerCorner[0],upperCorner[1]:lowerCorner[1]]
-			return window #.reshape(window.size,1)
+			return window.reshape(window.size,1) #.reshape(window.size,1)
 
 
 	def setWindowLR(self, shape):

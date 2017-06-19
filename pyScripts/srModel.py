@@ -4,24 +4,11 @@ from scipy import sparse
 import scipy.sparse.linalg 
 import genModel
 
-def sub2ind(shape, vecOS):
-	#converte vetor de subscritos para vetor de indices
-	ind = []
-	for i in range(vecOS.shape[1]):
-		ind.append(vecOS[0,i]*shape[0]+vecOS[1,i])
-	return np.array(ind)
-
-def getVecL(shapeHR, shapeL):
-	V = genModel.vecOfSub(shapeL) + np.array(shapeHR)[np.newaxis].T/2 - np.array(shapeL)[np.newaxis].T/2
-	return V
-
-def getWList(imageData, gamma, theta, s):
-	shapei = imageData.shapeHR
-	shapeo = np.round(shapei*imageData.f).astype('int')
-	v = (shapei/2.0) #centro da imagem 
+def getWList(imageData, gamma, theta, s, windowSizeL = None, windowSizeH = None):
+	v = (imageData.shapeHR/2.0) #centro da imagem 
 	W = []
 	for k in range(imageData.N):
-		W.append(genModel.psf(gamma, theta[k], s[:,k], shapei, shapeo, v))
+		W.append(genModel.psf(gamma, theta[k], s[:,k], imageData.shapeHR, imageData.shapeLR, v, windowSizeL, windowSizeH))
 	return W
 
 def priorDist(shapeHR, windowSizeL = None, A = 0.04, r=1):
@@ -30,7 +17,7 @@ def priorDist(shapeHR, windowSizeL = None, A = 0.04, r=1):
 	if windowSizeL == None:
 		vec_i = np.float16(genModel.vecOfSub(shapeHR))
 	else:
-		vec_i = getVecL(shapeHR, windowSizeL)
+		vec_i = genModel.getWindowVecOfSub(shapeHR, windowSizeL)
 
 	print 'Computing covariance matrix of the prior distribution'
 	Z = np.array([vec_i[0][np.newaxis].T - vec_i[0],
@@ -58,19 +45,29 @@ def getSigma(W, invZ, beta, N):
 
 	return sparse.csc_matrix(Sigma), detSigma/np.log(10.0)
 
-def getMu(W, imageData, Sigma):
+def getMu(W, imageData, Sigma, windowSizeL = None, windowSizeH = None):
 	print 'Computing mu/mean vector of the posterior distribution'
-	mu = sparse.csc_matrix(np.zeros((imageData.shapeHR.prod(),1)))
 
+	indexes = None
+	N = np.prod(imageData.shapeHR)
+	if windowSizeL != None:
+		indexes = genModel.sub2ind(imageData.shapeLR, genModel.getWindowVecOfSub(imageData.shapeLR, windowSizeL))
+		N = np.prod(windowSizeH)
+
+	mu = sparse.csc_matrix(np.zeros((N,1)))
 	for k in range(imageData.N):
 		print '    iteration: ' + str(k+1) + '/' + str(imageData.N)
-		y = sparse.csc_matrix(imageData.getImgVec(k))
+		y = sparse.csc_matrix(imageData.getImgVec(k)[indexes])
 		mu = mu + W[k].T*y
 
 	return imageData.beta*(Sigma*mu)
 
-def getloglikelihood(imageData, logDetSigma, W, invZ_x, logDetZ, mu):
+def getloglikelihood(imageData, logDetSigma, W, invZ_x, logDetZ, mu, windowSizeL = None, ):
 	print 'Computing L/log likelihood function'
+	
+	indexes = None
+	if windowSizeL != None:
+		indexes = genModel.sub2ind(imageData.shapeLR, genModel.getWindowVecOfSub(imageData.shapeLR, windowSizeL))
 	
 	beta = imageData.beta
 	M = np.round(imageData.shapeHR*imageData.f).prod()
@@ -81,32 +78,31 @@ def getloglikelihood(imageData, logDetSigma, W, invZ_x, logDetZ, mu):
 
 	for k in range(imageData.N):
 		print '    iteration: ' + str(k+1) + '/' + str(imageData.N)
-		y = imageData.getImgVec(k)
+		y = imageData.getImgVec(k)[indexes]
 		L = L + beta*np.linalg.norm(y - W[k]*mu)**2
 	return -L[0,0]/2
+
+# Here stars the class definitions	
 
 class Estimator:
 	def __init__(self, imageData, windowSizeL = None, A = 0.04, r=1):
 		self.L = []
 		self.imageData = imageData
 
-		if windowSizeL == None:
-			# if no window is provided the prior will use the whole image size
-			self.windowSizeL = imageData.shapeLR
-			self.windowSizeH = imageData.shapeHR
-		else:
-			# if a windows is provided, the prior will use just pixels on the center of the image
-			self.windowSizeL = windowSizeL
-			self.windowSizeH = np.divide(windowSizeL,imageData.f)
+		windowSizeH = None
+		self.windowSizeL = windowSizeL
+		
+		if windowSizeL != None:
+			self.windowSizeH = np.divide(windowSizeL, imageData.f).astype(int)
 
 		self.invZ_x, self.logDetZ_x = priorDist(self.imageData.shapeHR, self.windowSizeH, A, r)
 
 	def likelihood(self, gamma, theta, s):
-		W = getWList(self.imageData, gamma, theta, s)
+		W = getWList(self.imageData, gamma, theta, s, self.windowSizeL, self.windowSizeH)
 		Sigma, logDetSigma = getSigma(W, self.invZ_x, self.imageData.beta, self.imageData.N)
-		mu = getMu(W, self.imageData, Sigma)
+		mu = getMu(W, self.imageData, Sigma, self.windowSizeL, self.windowSizeH)
 		del Sigma
-		L = getloglikelihood(self.imageData, logDetSigma, W, self.invZ_x, self.logDetZ_x, mu)
+		L = getloglikelihood(self.imageData, logDetSigma, W, self.invZ_x, self.logDetZ_x, mu, self.windowSizeL)
 		self.L.append(L)
 
 		return L

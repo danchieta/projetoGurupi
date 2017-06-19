@@ -3,13 +3,25 @@
 import numpy as np
 from scipy import sparse
 
-# function return vector of subscripts
+def sub2ind(shape, vecOS):
+	# convert vector of subscripts to vector of indexes
+	ind = []
+	for i in range(vecOS.shape[1]):
+		ind.append(vecOS[0,i]*shape[0]+vecOS[1,i])
+	return np.array(ind)
+
 def decimate(shapei, shapeo):
-	x,y = np.meshgrid(np.linspace(0,shapei[0], shapeo[0]),
-		np.linspace(0,shapei[1], shapeo[1]))
+	x,y = np.meshgrid(np.linspace(0,shapei[0]-1, shapeo[0]),
+		np.linspace(0,shapei[1]-1, shapeo[1]))
 	x = np.reshape(x,(1,x.size),order='f').squeeze()
 	y = np.reshape(y,(1,y.size),order='f').squeeze()
 	return np.array([x,y])
+
+def getWindowVecOfSub(shapeHR, windowShape):
+	# obtem vetor de subscritos de pontos no centro de uma matriz delimitado por uma
+	# janela de dimens
+	V = vecOfSub(windowShape) + np.array(shapeHR)[np.newaxis].T/2 - np.array(windowShape)[np.newaxis].T/2
+	return V
 
 def vecOfSub(shp):
 	x,y = np.meshgrid(range(shp[0]),range(shp[1]))
@@ -17,18 +29,26 @@ def vecOfSub(shp):
 	y = np.reshape(y,(1,y.size),order='f').squeeze()
 	return np.array([x,y])
 
-def psf(gamma, theta, s, shapei, shapeo, v):
-	# numero de pixels em cada imagem
-	N = np.prod(shapei)
-	M = np.prod(shapeo)
+def psf(gamma, theta, s, shapei, shapeo, v, windowSizeL = None, windowSizeH = None):
+
+	if windowSizeH == None or windowSizeL == None:
+		# numero de pixels em cada imagem
+		N = np.prod(shapei)
+		M = np.prod(shapeo)
+
+		#Vetores de subscritos das imagens de saida e entrada
+		vec_j = decimate(shapei,shapeo)
+		vec_i = vecOfSub(shapei).astype(np.float16)
+	else:
+		N = np.prod(windowSizeH)
+		M = np.prod(windowSizeL)
+
+		vec_i = getWindowVecOfSub(shapei, windowSizeH).astype(np.float16)
+		vec_j = decimate(windowSizeH, windowSizeL) + vec_i[:,0].reshape(2,1)
 
 	# Matriz de rotacao
 	R = np.array([[np.cos(theta) , np.sin(theta)],[-np.sin(theta), np.cos(theta)]]) 
 
-	#Vetores de subscritos das imagens de saida e entrada
-	vec_j = decimate(shapei,shapeo)
-	vec_i = vecOfSub(shapei).astype(np.float16)
-	
 	v = v.reshape(2,1) #centro da imagem como vetor coluna
 	s = np.array(s).reshape(2,1) #deslocamento como vetor coluna
 

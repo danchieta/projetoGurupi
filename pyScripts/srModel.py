@@ -92,17 +92,44 @@ class Data:
 		self.inFolder = inFolder
 		filename1 = inFolder + csvfile1
 		filename2 = inFolder + csvfile2
+
+		self.windowed = False
+
 		self.filename = np.genfromtxt(filename1, dtype=str, skip_header = 1, usecols = 0, delimiter = ';' ).tolist()
 		self.s = np.genfromtxt(filename1, skip_header = 1, usecols = [1,2], delimiter = ';' ).T
 		self.theta = np.genfromtxt(filename1, skip_header = 1, usecols = 3, delimiter = ';' )
 
-		self.shapeHR = np.genfromtxt(filename2, skip_header = 1, usecols = [0,1], delimiter = ';' ).astype(int)
 		self.beta = np.genfromtxt(filename2, skip_header = 1, usecols = 2, delimiter = ';' )
 		self.f = np.genfromtxt(filename2, skip_header = 1, usecols = 3, delimiter = ';' )
 		self.gamma = np.genfromtxt(filename2, skip_header = 1, usecols = 4, delimiter = ';' )
 		self.N = np.asscalar(np.genfromtxt(filename2, skip_header = 1, usecols = 5, delimiter = ';' ).astype(int))
+		self.shapeLR = Image.open(self.inFolder + self.filename[0]).size
 
 	def getImgVec(self, index):
 		img = np.array(Image.open(self.inFolder + self.filename[index]).convert('L'))
-		d = np.array(img.shape)
-		return img.reshape(d.prod(),1)
+		if not self.windowed:
+			return img.reshape(img.size,1)
+		else:
+			upperCorner = np.floor([0,0] - np.divide(self.windowShapeLR,2) +np.divide(img.shape,2))
+			lowerCorner = np.floor(np.array(self.windowShapeLR) - np.divide(self.windowShapeLR,2) +np.divide(img.shape,2))
+			window = img[upperCorner[0]:lowerCorner[0],upperCorner[1]:lowerCorner[1]]
+			return window #.reshape(window.size,1)
+
+
+	def setWindowLR(self, shape):
+		self.windowShapeLR = shape
+		self.windowed = True
+
+	def getShapeLR(self):
+		if  not self.windowed:
+			return self.shapeLR
+		else:
+			return self.windowShapeLR
+
+	def getShapeHR(self):
+		if not self.windowed:
+			return (self.shapeLR/self.f).astype(int)
+		else:
+			return (self.windowShapeLR/self.f).astype(int)
+
+

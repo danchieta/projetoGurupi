@@ -7,16 +7,21 @@ csv2 = 'globalParams.csv'
 
 
 D = srModel.Data(inFolder, csv1, csv2)
-E1 = srModel.Estimator(D)
-L = []
+D.setWindowLR((10,10))
 
-L.append(E1.likelihood(D.gamma, D.theta, D.s))
+print 'shapeLR:', D.getShapeLR()
+print 'shapeHR:', D.getShapeHR()
 
-num = 3
+# E1 = srModel.Estimator(D)
+# L = []
 
-gamma = np.random.rand(num)*num
-theta = (np.random.rand(D.N,num)*16-8)*pi/180
-s = np.random.rand(2,D.N,num)*4-2
+# L.append(E1.likelihood(D.gamma, D.theta, D.s))
 
-for k in range(num):
-	L.append(E1.likelihood(gamma[k], theta[:,k], s[:,:,k]))
+# num = 3
+
+# gamma = np.random.rand(num)*num
+# theta = (np.random.rand(D.N,num)*16-8)*pi/180
+# s = np.random.rand(2,D.N,num)*4-2
+
+# for k in range(num):
+# 	L.append(E1.likelihood(gamma[k], theta[:,k], s[:,:,k]))

@@ -10,9 +10,8 @@ D = srModel.Data(inFolder, csv1, csv2)
 D.setWindowLR((20,20))
 
 E1 = srModel.Estimator(D)
-L = []
 
-L_true = E1.likelihood(D.gamma, D.theta, D.s)
+L = [E1.likelihood(D.gamma, D.theta, D.s)]
 
 num = 3
 
@@ -26,6 +25,7 @@ for i in range(expNum):
 
 	for k in range(num):
 		L.append(E1.likelihood(gamma[k], theta[:,k], s[:,:,k]))
+		print 'L:', L[k+1]
 
 	print L
 	print np.argmax(L)

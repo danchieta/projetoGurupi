@@ -7,21 +7,31 @@ csv2 = 'globalParams.csv'
 
 
 D = srModel.Data(inFolder, csv1, csv2)
-D.setWindowLR((10,10))
+D.setWindowLR((20,20))
 
-print 'shapeLR:', D.getShapeLR()
-print 'shapeHR:', D.getShapeHR()
+E1 = srModel.Estimator(D)
+L = []
 
-# E1 = srModel.Estimator(D)
-# L = []
+L_true = E1.likelihood(D.gamma, D.theta, D.s)
 
-# L.append(E1.likelihood(D.gamma, D.theta, D.s))
+num = 3
 
-# num = 3
+expNum = 10
+acertos = 0
 
-# gamma = np.random.rand(num)*num
-# theta = (np.random.rand(D.N,num)*16-8)*pi/180
-# s = np.random.rand(2,D.N,num)*4-2
+for i in range(expNum):
+	gamma = np.random.rand(num)*num
+	theta = (np.random.rand(D.N,num)*16-8)*np.pi/180
+	s = np.random.rand(2,D.N,num)*4-2
 
-# for k in range(num):
-# 	L.append(E1.likelihood(gamma[k], theta[:,k], s[:,:,k]))
+	for k in range(num):
+		L.append(E1.likelihood(gamma[k], theta[:,k], s[:,:,k]))
+
+	print L
+	print np.argmax(L)
+	if np.argmax(L) == 0:
+		acertos += 1
+	L = [L[0]]
+	del gamma, theta, s
+
+print 'acertos: ', acertos

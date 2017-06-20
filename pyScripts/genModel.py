@@ -5,8 +5,8 @@ from scipy import sparse
 
 # function return vector of subscripts
 def decimate(shapei, shapeo):
-	x,y = np.meshgrid(np.linspace(0,shapei[0], shapeo[0]),
-		np.linspace(0,shapei[1], shapeo[1]))
+	x,y = np.meshgrid(np.linspace(0,shapei[0]-1, shapeo[0]),
+		np.linspace(0,shapei[1]-1, shapeo[1]))
 	x = np.reshape(x,(1,x.size),order='f').squeeze()
 	y = np.reshape(y,(1,y.size),order='f').squeeze()
 	return np.array([x,y])

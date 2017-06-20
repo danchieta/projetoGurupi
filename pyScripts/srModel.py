@@ -5,7 +5,7 @@ import scipy.sparse.linalg
 import genModel
 
 def getWList(imageData, gamma, theta, s):
-	shapei = imageData.shapeHR
+	shapei = imageData.getShapeHR()
 	shapeo = np.round(shapei*imageData.f).astype('int')
 	v = (shapei/2.0) #centro da imagem 
 	W = []
@@ -45,7 +45,7 @@ def getSigma(W, invZ, beta, N):
 
 def getMu(W, imageData, Sigma):
 	print 'Computing mu/mean vector of the posterior distribution'
-	mu = sparse.csc_matrix(np.zeros((imageData.shapeHR.prod(),1)))
+	mu = sparse.csc_matrix(np.zeros((imageData.getShapeHR().prod(),1)))
 
 	for k in range(imageData.N):
 		print '    iteration: ' + str(k+1) + '/' + str(imageData.N)
@@ -58,7 +58,7 @@ def getloglikelihood(imageData, logDetSigma, W, invZ_x, logDetZ, mu):
 	print 'Computing L/log likelihood function'
 	
 	beta = imageData.beta
-	M = np.round(imageData.shapeHR*imageData.f).prod()
+	M = np.round(imageData.getShapeHR()*imageData.f).prod()
 	L = np.dot(np.dot(mu.T.toarray(),invZ_x.toarray()),mu.toarray())
 	L = L + logDetZ
 	L = L - logDetSigma
@@ -74,7 +74,7 @@ class Estimator:
 	def __init__(self, imageData, A = 0.04, r=1):
 		self.L = []
 		self.imageData = imageData
-		self.invZ_x, self.logDetZ_x = priorDist(self.imageData.shapeHR, A, r)
+		self.invZ_x, self.logDetZ_x = priorDist(self.imageData.getShapeHR(), A, r)
 
 	def likelihood(self, gamma, theta, s):
 		W = getWList(self.imageData, gamma, theta, s)

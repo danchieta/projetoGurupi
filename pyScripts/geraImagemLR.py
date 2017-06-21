@@ -1,12 +1,12 @@
 import numpy as np
 from PIL import Image
 import csv
-from genModel import *
+import genModel
 
 outFolder = '../degradedImg/' #diretorio de saida
 outFormat = '.bmp' #formato de saida
 
-N = 16 #numero de imagens a serem 
+N = 16 #numero de imagens a serem geradas
 img = np.array(Image.open('../testIMG/imtestes.png').convert('L')) #abre imagem a ser degradada
 f = 0.25 # fator de subamostragem
 gamma = 2 # tamanho da funcao de espalhamento de ponto
@@ -19,7 +19,7 @@ filename = [] #inicia lista com nomes de arquivo
 
 for k in range(N):
 	print 'gerando imgagem' + str(k)
-	y = degradaImagem(img,gamma,theta[k],s[:,k],f)
+	y = genModel.degradaImagem(img,gamma,theta[k],s[:,k],f)
 	imgr = Image.fromarray(y).convert('RGB')
 	filename.append('result-'+str(k)+outFormat)
 	imgr.save(outFolder+filename[k])

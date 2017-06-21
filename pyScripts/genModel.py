@@ -1,7 +1,5 @@
 #este modulo contem as funcoes referentes ao modelo de observacao
-
 import numpy as np
-from scipy import sparse
 
 # function return vector of subscripts
 def decimate(shapei, shapeo):
@@ -41,7 +39,7 @@ def psf(gamma, theta, s, shapei, shapeo, v):
 	vec_W = np.exp(-np.linalg.norm(vec_W, axis = 0)**2./gamma**2.)
 
 	# retorna linha da PSF normalizada
-	return sparse.csc_matrix(vec_W/vec_W.sum(axis = 1)[np.newaxis].T)
+	return vec_W/vec_W.sum(axis = 1)[np.newaxis].T
 
 def degradaImagem(img, gamma, theta, s, f, sigma = 4):
 	d = np.array(img.shape) #dimensoes da imagem de entrada
@@ -51,7 +49,7 @@ def degradaImagem(img, gamma, theta, s, f, sigma = 4):
 	y = np.zeros(dd.prod()) + np.random.randn(dd.prod(),1)*sigma #Vetor imagem resultante
 
 	W = psf(gamma, theta, s, d, dd, v) #gera uma linha imgrfuncao de espalhamento de ponto
-	y = W*img #aplicacao da fucao de espalhamento de ponto
+	y = np.dot(W,img) #aplicacao da fucao de espalhamento de ponto
 		#print 100.0*i/dd.prod()
 
 	return y.reshape(dd)

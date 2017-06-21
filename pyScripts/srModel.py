@@ -1,7 +1,5 @@
 import numpy as np
 from PIL import Image
-from scipy import sparse
-import scipy.sparse.linalg 
 import genModel
 
 def getWList(imageData, gamma, theta, s):
@@ -17,17 +15,17 @@ def priorDist(shapeHR, A = 0.04, r=1):
 	# gera matriz de covariancia para funcao de probabilidade a priori da imagem HR
 	# a ser estimada.
 	print 'Computing covariance matrix of the prior distribution'
-	vec_i = np.float16(genModel.vecOfSub(shapeHR))
+	vec_i = genModel.vecOfSub(shapeHR)
 	Z = np.array([vec_i[0][np.newaxis].T - vec_i[0],
 		vec_i[1][np.newaxis].T - vec_i[1]])
 	Z = np.linalg.norm(Z,axis=0)
 	Z = A*np.exp(-Z**2/r**2)
 
 	print '   Computing log determinant'
-	sign, detZ = np.linalg.slogdet(Z.astype(np.float32))
+	sign, detZ = np.linalg.slogdet(Z)
 
 	print '   Computing inverse matrix'
-	invZ = sparse.csc_matrix(np.linalg.inv(Z.astype(np.float)))
+	invZ = np.linalg.inv(Z)
 	return invZ, detZ/np.log(10.0)
 
 def getSigma(W, invZ, beta, N):
@@ -36,30 +34,30 @@ def getSigma(W, invZ, beta, N):
 
 	for k in range(N):
 		print '    iteration: ' + str(k+1) + '/' + str(N)
-		Sigma = Sigma + beta*np.dot(W[k].T.toarray(),W[k].toarray())
+		Sigma = Sigma + beta*np.dot(W[k].T,W[k])
 
 	print '    Computing log determinant'
-	sign, detSigma = np.linalg.slogdet(Sigma.astype(np.float32))
+	sign, detSigma = np.linalg.slogdet(Sigma)
 
-	return sparse.csc_matrix(Sigma), detSigma/np.log(10.0)
+	return Sigma, detSigma/np.log(10.0)
 
 def getMu(W, imageData, Sigma):
 	print 'Computing mu/mean vector of the posterior distribution'
-	mu = sparse.csc_matrix(np.zeros((imageData.getShapeHR().prod(),1)))
+	mu = np.zeros((imageData.getShapeHR().prod(),1))
 
 	for k in range(imageData.N):
 		print '    iteration: ' + str(k+1) + '/' + str(imageData.N)
-		y = sparse.csc_matrix(imageData.getImgVec(k))
-		mu = mu + W[k].T*y
+		y = imageData.getImgVec(k)
+		mu = mu + np.dot(W[k].T,y)
 
-	return imageData.beta*(Sigma*mu)
+	return imageData.beta*(np.dot(Sigma,mu))
 
 def getloglikelihood(imageData, logDetSigma, W, invZ_x, logDetZ, mu):
 	print 'Computing L/log likelihood function'
 	
 	beta = imageData.beta
 	M = np.round(imageData.getShapeHR()*imageData.f).prod()
-	L = np.dot(np.dot(mu.T.toarray(),invZ_x.toarray()),mu.toarray())
+	L = np.dot(np.dot(mu.T,invZ_x),mu)
 	L = L + logDetZ
 	L = L - logDetSigma
 	L = L - imageData.N*M*np.log10(imageData.beta)
@@ -67,7 +65,7 @@ def getloglikelihood(imageData, logDetSigma, W, invZ_x, logDetZ, mu):
 	for k in range(imageData.N):
 		print '    iteration: ' + str(k+1) + '/' + str(imageData.N)
 		y = imageData.getImgVec(k)
-		L = L + beta*np.linalg.norm(y - W[k]*mu)**2
+		L = L + beta*np.linalg.norm(y - np.dot(W[k],mu))**2
 	return -L[0,0]/2
 
 class Estimator:

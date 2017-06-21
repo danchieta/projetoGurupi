@@ -12,15 +12,15 @@ D.setWindowLR((20,20))
 E1 = srModel.Estimator(D)
 L = []
 
-L_true = E1.likelihood(D.gamma, D.theta, D.s)
+L = [E1.likelihood(D.gamma, D.theta, D.s)]
 
 num = 3
 
-expNum = 10
+expNum = 15
 acertos = 0
 
 for i in range(expNum):
-	gamma = np.random.rand(num)*num
+	gamma = np.random.rand(num)*2 + 1
 	theta = (np.random.rand(D.N,num)*16-8)*np.pi/180
 	s = np.random.rand(2,D.N,num)*4-2
 

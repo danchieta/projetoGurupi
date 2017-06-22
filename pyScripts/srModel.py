@@ -68,7 +68,20 @@ def getloglikelihood(imageData, logDetSigma, W, invZ_x, logDetZ, mu):
 		L = L + beta*np.linalg.norm(y - np.dot(W[k],mu))**2
 	return -L[0,0]/2
 
-class Estimator:
+def imageLikelihood(imageData, x, W):
+	# funcao calcula p(y|x,s,theta,gamma)
+	beta = imageData.beta
+
+	M = np.prod(imageData.getShapeLR())
+	P = ((beta/(2*np.pi))**(M/2.0))**imageData.N
+
+	for k in range(imageData.N):
+		P = P*np.exp(-(beta/2)*np.linalg.norm(imageData.getImgVec(k) - np.dot(W[k],x))**2.0)
+
+	return P
+
+
+class ParameterEstimator:
 	def __init__(self, imageData, A = 0.04, r=1):
 		self.L = []
 		self.imageData = imageData
@@ -83,6 +96,14 @@ class Estimator:
 		self.L.append(L)
 
 		return L
+
+class ImageEstimator:
+	def __init__(self, imageData, gamma, theta, s):
+		self.imageData = imageData
+		self.W = getWList(self.imageData, gamma, theta, s)
+
+	def getImageLikelihood(self, x):
+		return imageLikelihood(self.imageData, x, self.W)
 
 
 class Data:
@@ -101,7 +122,7 @@ class Data:
 		self.f = np.genfromtxt(filename2, skip_header = 1, usecols = 3, delimiter = ';' )
 		self.gamma = np.genfromtxt(filename2, skip_header = 1, usecols = 4, delimiter = ';' )
 		self.N = np.asscalar(np.genfromtxt(filename2, skip_header = 1, usecols = 5, delimiter = ';' ).astype(int))
-		self.shapeLR = Image.open(self.inFolder + self.filename[0]).size
+		self.shapeLR = np.array(Image.open(self.inFolder + self.filename[0]).convert('L')).shape
 
 	def getImgVec(self, index):
 		img = np.array(Image.open(self.inFolder + self.filename[index]).convert('L'))

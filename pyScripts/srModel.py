@@ -26,7 +26,7 @@ def priorDist(shapeHR, A = 0.04, r=1):
 
 	print '   Computing inverse matrix'
 	invZ = np.linalg.inv(Z)
-	return invZ, detZ/np.log(10.0)
+	return invZ, detZ
 
 def getSigma(W, invZ, beta, N):
 	print 'Computing Sigma/covariance matrix of the posterior distribution'	
@@ -39,7 +39,7 @@ def getSigma(W, invZ, beta, N):
 	print '    Computing log determinant'
 	sign, detSigma = np.linalg.slogdet(Sigma)
 
-	return Sigma, detSigma/np.log(10.0)
+	return Sigma, detSigma
 
 def getMu(W, imageData, Sigma):
 	print 'Computing mu/mean vector of the posterior distribution'
@@ -60,7 +60,7 @@ def getloglikelihood(imageData, logDetSigma, W, invZ_x, logDetZ, mu):
 	L = np.dot(np.dot(mu.T,invZ_x),mu)
 	L = L + logDetZ
 	L = L - logDetSigma
-	L = L - imageData.N*M*np.log10(imageData.beta)
+	L = L - imageData.N*M*np.log(imageData.beta)
 
 	for k in range(imageData.N):
 		print '    iteration: ' + str(k+1) + '/' + str(imageData.N)
@@ -69,16 +69,20 @@ def getloglikelihood(imageData, logDetSigma, W, invZ_x, logDetZ, mu):
 	return -L[0,0]/2
 
 def imageLikelihood(imageData, x, W):
-	# funcao calcula p(y|x,s,theta,gamma)
+	# funcao calcula log(p(y|x,s,theta,gamma))
 	beta = imageData.beta
 
 	M = np.prod(imageData.getShapeLR())
-	P = ((beta/(2*np.pi))**(M/2.0))**imageData.N
-
+	P = 0
 	for k in range(imageData.N):
-		P = P*np.exp(-(beta/2)*np.linalg.norm(imageData.getImgVec(k) - np.dot(W[k],x))**2.0)
+		P = P + np.linalg.norm(imageData.getImgVec(k)-W[k]*x)**2
+	P = P - imageData.N*M*(np.log(beta/(2*np.pi))
 
-	return P
+	return -P/2.0
+
+def priorPDF(N, x, mu_x, invZ_x, logDetZ_x):
+	# log(p(x))
+	return -(N*np.log(2*np.pi) + logDetZ_x + np.dot((x - mu_x).T, invZ_x).dot(x - mu_x))/2.0
 
 
 class ParameterEstimator:

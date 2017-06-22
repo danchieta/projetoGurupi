@@ -41,7 +41,7 @@ def psf(gamma, theta, s, shapei, shapeo, v):
 	# retorna linha da PSF normalizada
 	return vec_W/vec_W.sum(axis = 1)[np.newaxis].T
 
-def degradaImagem(img, gamma, theta, s, f, sigma = 4):
+def degradaImagem(img, gamma, theta, s, f, sigma = 4, beta = 400):
 	d = np.array(img.shape) #dimensoes da imagem de entrada
 	img = img.reshape(d.prod(),1)
 	dd = np.round(d*f).astype('int') #dimensoes da imagem de saida
@@ -49,7 +49,7 @@ def degradaImagem(img, gamma, theta, s, f, sigma = 4):
 	y = np.zeros(dd.prod()) + np.random.randn(dd.prod(),1)*sigma #Vetor imagem resultante
 
 	W = psf(gamma, theta, s, d, dd, v) #gera uma linha imgrfuncao de espalhamento de ponto
-	y = np.dot(W,img) #aplicacao da fucao de espalhamento de ponto
+	y = np.dot(W,img) + np.sqrt(1/beta) #aplicacao da fucao de espalhamento de ponto
 		#print 100.0*i/dd.prod()
 
 	return y.reshape(dd)

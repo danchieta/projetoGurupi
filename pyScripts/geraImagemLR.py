@@ -12,14 +12,13 @@ f = 0.25 # fator de subamostragem
 gamma = 2 # tamanho da funcao de espalhamento de ponto
 s = np.random.rand(2,N)*4-2 #deslocamento da imagem
 theta = (np.random.rand(N)*8-4)*np.pi/180 #angulo de rotacao (com variancia de pi/100)
-beta = 0.05
+beta = 400 # precisao = 1/variancia do ruido
 
-sigma = np.sqrt(1/beta) #desvio padrao do ruido
 filename = [] #inicia lista com nomes de arquivo
 
 for k in range(N):
 	print 'gerando imgagem' + str(k)
-	y = genModel.degradaImagem(img,gamma,theta[k],s[:,k],f)
+	y = genModel.degradaImagem(img,gamma,theta[k],s[:,k],f,beta)
 	imgr = Image.fromarray(y).convert('RGB')
 	filename.append('result-'+str(k)+outFormat)
 	imgr.save(outFolder+filename[k])

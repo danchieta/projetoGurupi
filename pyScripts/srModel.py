@@ -11,11 +11,11 @@ def getWList(imageData, gamma, theta, s):
 		W.append(genModel.psf(gamma, theta[k], s[:,k], shapei, shapeo, v))
 	return W
 
-def priorDist(shapeHR, A = 0.04, r=1):
+def priorCovMat(shapeHR, A = 0.04, r=1, dtype='float64'):
 	# gera matriz de covariancia para funcao de probabilidade a priori da imagem HR
 	# a ser estimada.
 	print 'Computing covariance matrix of the prior distribution'
-	vec_i = genModel.vecOfSub(shapeHR)
+	vec_i = genModel.vecOfSub(shapeHR).astype(dtype)
 	Z = np.array([vec_i[0][np.newaxis].T - vec_i[0],
 		vec_i[1][np.newaxis].T - vec_i[1]])
 	Z = np.linalg.norm(Z,axis=0)
@@ -68,28 +68,26 @@ def getloglikelihood(imageData, logDetSigma, W, invZ_x, logDetZ, mu):
 		L = L + beta*np.linalg.norm(y - np.dot(W[k],mu))**2
 	return -L[0,0]/2
 
-def imageLikelihood(imageData, x, W):
+def imageLikelihood(imageData, x, W, logDetZ_x, invZ_x):
 	# funcao calcula log(p(y|x,s,theta,gamma))
 	beta = imageData.beta
 
 	M = np.prod(imageData.getShapeLR())
+
 	P = 0
 	for k in range(imageData.N):
-		P = P + np.linalg.norm(imageData.getImgVec(k)-W[k]*x)**2
-	P = P - imageData.N*M*(np.log(beta/(2*np.pi))
+		P = P + np.linalg.norm(imageData.getImgVec(k)-W[k].dot(x))**2
+	P = imageData.beta*P - imageData.N*M*np.log(beta/(2*np.pi))
 
-	return -P/2.0
-
-def priorPDF(N, x, mu_x, invZ_x, logDetZ_x):
-	# log(p(x))
-	return -(N*np.log(2*np.pi) + logDetZ_x + np.dot((x - mu_x).T, invZ_x).dot(x - mu_x))/2.0
-
+	# adding the prior
+	P = P + imageData.N*np.log(2*np.pi) + logDetZ_x + np.dot(x.T, invZ_x).dot(x)
+	return (-P/2.0)
 
 class ParameterEstimator:
 	def __init__(self, imageData, A = 0.04, r=1):
 		self.L = []
 		self.imageData = imageData
-		self.invZ_x, self.logDetZ_x = priorDist(self.imageData.getShapeHR(), A, r)
+		self.invZ_x, self.logDetZ_x = priorCovMat(self.imageData.getShapeHR(), A, r)
 
 	def likelihood(self, gamma, theta, s):
 		W = getWList(self.imageData, gamma, theta, s)
@@ -106,8 +104,10 @@ class ImageEstimator:
 		self.imageData = imageData
 		self.W = getWList(self.imageData, gamma, theta, s)
 
+		self.invZ_x, self.logDetZ_x = priorCovMat(self.imageData.getShapeHR(), dtype = 'float32')
+
 	def getImageLikelihood(self, x):
-		return imageLikelihood(self.imageData, x, self.W)
+		return imageLikelihood(self.imageData, x, self.W, self.logDetZ_x, self.invZ_x)
 
 
 class Data:
@@ -154,5 +154,3 @@ class Data:
 			return (self.shapeLR/self.f).astype(int)
 		else:
 			return (self.windowShapeLR/self.f).astype(int)
-
-

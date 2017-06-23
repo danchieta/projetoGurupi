@@ -11,21 +11,38 @@ def getWList(imageData, gamma, theta, s):
 		W.append(genModel.psf(gamma, theta[k], s[:,k], shapei, shapeo, v))
 	return W
 
-def priorCovMat(shapeHR, A = 0.04, r=1, dtype='float64'):
+def priorCovMat(shapeHR, A = 0.04, r=1, dtype='float64', savetoDisk = False):
 	# gera matriz de covariancia para funcao de probabilidade a priori da imagem HR
 	# a ser estimada.
-	print 'Computing covariance matrix of the prior distribution'
-	vec_i = genModel.vecOfSub(shapeHR).astype(dtype)
-	Z = np.array([vec_i[0][np.newaxis].T - vec_i[0],
-		vec_i[1][np.newaxis].T - vec_i[1]])
-	Z = np.linalg.norm(Z,axis=0)
-	Z = A*np.exp(-Z**2/r**2)
 
-	print '   Computing log determinant'
-	sign, detZ = np.linalg.slogdet(Z)
+	try:
+		if not savetoDisk:
+			raise Exception()
+		covFile = np.load('priorCov.npz')
+		if covFile['A'] == A and covFile['r'] == r:
+			print 'Loading inverse covarianve matrix and determinant from disk.'
+			detZ = covFile['detZ']
+			invZ = covFile['invZ']
+		else:
+			raise Exception()
 
-	print '   Computing inverse matrix'
-	invZ = np.linalg.inv(Z)
+	except:
+		print 'Computing covariance matrix of the prior distribution'
+		vec_i = genModel.vecOfSub(shapeHR).astype(dtype)
+		Z = np.array([vec_i[0][np.newaxis].T - vec_i[0],
+			vec_i[1][np.newaxis].T - vec_i[1]])
+		Z = np.linalg.norm(Z,axis=0)
+		Z = A*np.exp(-Z**2/r**2)
+
+		print '   Computing log determinant'
+		sign, detZ = np.linalg.slogdet(Z)
+
+		print '   Computing inverse matrix'
+		invZ = np.linalg.inv(Z)
+
+		if savetoDisk:
+			print 'Saving covariance matrix to disk.'
+			np.savez('priorCov.npz', invZ=invZ, detZ=detZ, A=A, r=r)
 	return invZ, detZ
 
 def getSigma(W, invZ, beta, N):
@@ -104,7 +121,7 @@ class ImageEstimator:
 		self.imageData = imageData
 		self.W = getWList(self.imageData, gamma, theta, s)
 
-		self.invZ_x, self.logDetZ_x = priorCovMat(self.imageData.getShapeHR(), dtype = 'float32')
+		self.invZ_x, self.logDetZ_x = priorCovMat(self.imageData.getShapeHR(), dtype = 'float32', savetoDisk=True)
 
 	def getImageLikelihood(self, x):
 		return imageLikelihood(self.imageData, x, self.W, self.logDetZ_x, self.invZ_x)

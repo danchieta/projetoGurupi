@@ -15,4 +15,3 @@ D = srModel.Data(inFolder, csv1, csv2)
 
 E2 = srModel.ImageEstimator(D, D.gamma, D.theta, D.s)
 # P = E2.getImageLikelihood(x)
-

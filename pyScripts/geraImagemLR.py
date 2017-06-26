@@ -2,11 +2,16 @@ import numpy as np
 from PIL import Image
 import csv
 import genModel
+import os
 
 outFolder = '../degradedImg/' #diretorio de saida
 outFormat = '.bmp' #formato de saida
 
-N = 16 #numero de imagens a serem geradas
+# cria pasta de saida caso ela nao exista
+if not os.path.exists(outFolder):
+    os.makedirs(outFolder)
+
+N = 3 #numero de imagens a serem geradas
 img = np.array(Image.open('../testIMG/imtestes.png').convert('L')) #abre imagem a ser degradada
 f = 0.25 # fator de subamostragem
 gamma = 2 # tamanho da funcao de espalhamento de ponto

@@ -98,7 +98,7 @@ def imageLikelihood(imageData, x, W, logDetZ_x, invZ_x):
 
 	# adding the prior
 	P = P + imageData.N*np.log(2*np.pi) + logDetZ_x + np.dot(x.T, invZ_x).dot(x)
-	return (-P/2.0)
+	return (-P/2.0)[0,0]
 
 class ParameterEstimator:
 	def __init__(self, imageData, A = 0.04, r=1):

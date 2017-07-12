@@ -9,3 +9,14 @@ def sparseSave(A, filename):
 def sparseLoad(filename):
 	# load sparse matrix 
 	return sparse.csc_matrix((matfile['data'], matfile['indices'], matfile['indptr']), shape = matfile['shape'])
+
+import srModel
+import sys
+
+invZ, _ = srModel.priorCovMat((100,150), savetoDisk = True)
+
+print 'size of dense matrix:', sys.getsizeof(invZ), 'bytes'
+
+Z = sparse.csc_matrix(invZ)
+
+sparseSave(Z, 'sparseZ.npz')

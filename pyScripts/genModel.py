@@ -3,14 +3,14 @@ import numpy as np
 
 # function return vector of subscripts
 def decimate(shapei, shapeo):
-	x,y = np.meshgrid(np.linspace(0,shapei[0]-1, shapeo[0]),
-		np.linspace(0,shapei[1]-1, shapeo[1]))
+	y,x = np.meshgrid(np.linspace(0,shapei[1]-1, shapeo[1]),
+		np.linspace(0,shapei[0]-1, shapeo[0]))
 	x = np.reshape(x,(1,x.size),order='f').squeeze()
 	y = np.reshape(y,(1,y.size),order='f').squeeze()
 	return np.array([x,y])
 
 def vecOfSub(shp):
-	x,y = np.meshgrid(range(shp[0]),range(shp[1]))
+	y,x = np.meshgrid(range(shp[1]),range(shp[0]))
 	x = np.reshape(x,(1,x.size),order='f').squeeze()
 	y = np.reshape(y,(1,y.size),order='f').squeeze()
 	return np.array([x,y])
@@ -43,7 +43,7 @@ def psf(gamma, theta, s, shapei, shapeo, v):
 
 def degradaImagem(img, gamma, theta, s, f, sigma = 4, beta = 400):
 	d = np.array(img.shape) #dimensoes da imagem de entrada
-	img = img.reshape(d.prod(),1)
+	img = img.reshape((d.prod(),1), order = 'f')
 	dd = np.round(d*f).astype('int') #dimensoes da imagem de saida
 	v = (d/2.0) #centro da imagem 
 	y = np.zeros(dd.prod()) + np.random.randn(dd.prod(),1)*sigma #Vetor imagem resultante

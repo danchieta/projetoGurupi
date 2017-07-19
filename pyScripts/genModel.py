@@ -33,9 +33,12 @@ def psf(gamma, theta, s, shapei, shapeo, v):
 	# Rotacao e deslocamento de cada pixel da imagem HR
 	vec_u = np.dot(R, (vec_j-v))+v+s
 
+	print 'shape vec_i', vec_i.shape
+	print 'shape vec_u', vec_u.shape
+
 	# gerando a matriz da funcao de espalhamento de ponto
-	vec_W = np.array([vec_u[0][np.newaxis].T - vec_i[0],
-		vec_u[1][np.newaxis].T - vec_i[1]])
+	vec_W = np.array([vec_i[0] - vec_u[0][np.newaxis].T,
+		vec_i[1] - vec_u[1][np.newaxis].T])
 	vec_W = np.exp(-np.linalg.norm(vec_W, axis = 0)**2./gamma**2.)
 
 	# retorna linha da PSF normalizada
@@ -52,4 +55,4 @@ def degradaImagem(img, gamma, theta, s, f, sigma = 4, beta = 400):
 	y = np.dot(W,img) + np.sqrt(1/beta) #aplicacao da fucao de espalhamento de ponto
 		#print 100.0*i/dd.prod()
 
-	return y.reshape(dd)
+	return y.reshape(dd, order = 'f')

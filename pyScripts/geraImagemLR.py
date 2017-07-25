@@ -11,10 +11,10 @@ outFormat = '.bmp' #formato de saida
 if not os.path.exists(outFolder):
     os.makedirs(outFolder)
 
-N = 1 #numero de imagens a serem geradas
+N = 15 #numero de imagens a serem geradas
 img = np.array(Image.open('../testIMG/imtestes.png').convert('L')) #abre imagem a ser degradada
-f = 0.75 # fator de subamostragem
-gamma = 2 # tamanho da funcao de espalhamento de ponto
+f = 0.25 # fator de subamostragem
+gamma = 4 # tamanho da funcao de espalhamento de ponto
 s = np.random.rand(2,N)*4-2 #deslocamento da imagem
 theta = (np.random.rand(N)*8-4)*np.pi/180 #angulo de rotacao (com variancia de pi/100)
 beta = 400 # precisao = 1/variancia do ruido

@@ -21,7 +21,8 @@ def psf(gamma, theta, s, shapei, shapeo, v):
 	M = np.prod(shapeo)
 
 	# Matriz de rotacao
-	R = np.array([[np.cos(theta) , np.sin(theta)],[-np.sin(theta), np.cos(theta)]]) 
+	R = np.array([[np.cos(theta) , np.sin(theta)],
+		[-np.sin(theta), np.cos(theta)]]) 
 
 	#Vetores de subscritos das imagens de saida e entrada
 	vec_j = decimate(shapei,shapeo)

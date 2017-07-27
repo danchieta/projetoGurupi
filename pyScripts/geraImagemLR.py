@@ -11,7 +11,7 @@ outFormat = '.bmp' #formato de saida
 if not os.path.exists(outFolder):
     os.makedirs(outFolder)
 
-N = 15 #numero de imagens a serem geradas
+N = 16 #numero de imagens a serem geradas
 img = np.array(Image.open('../testIMG/imtestes.png').convert('L')) #abre imagem a ser degradada
 f = 0.25 # fator de subamostragem
 gamma = 4 # tamanho da funcao de espalhamento de ponto
@@ -51,5 +51,5 @@ with open(outFolder + 'globalParams.csv', 'wb') as csvfile:
 		'shapei1': img.shape[1],
 		'beta' : beta,
 		'f':f,
-		'gamma':2,
+		'gamma': gamma,
 		'N':N})

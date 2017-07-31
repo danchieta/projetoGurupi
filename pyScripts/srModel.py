@@ -50,7 +50,7 @@ def getSigma(W, invZ, beta, N):
 	Sigma = invZ
 
 	for k in range(N):
-		print '    iteration: ' + str(k+1) + '/' + str(N)
+		# print '    iteration: ' + str(k+1) + '/' + str(N)
 		Sigma = Sigma + beta*np.dot(W[k].T,W[k])
 
 	print '    Computing log determinant'
@@ -63,7 +63,7 @@ def getMu(W, imageData, Sigma):
 	mu = np.zeros((imageData.getShapeHR().prod(),1))
 
 	for k in range(imageData.N):
-		print '    iteration: ' + str(k+1) + '/' + str(imageData.N)
+		# print '    iteration: ' + str(k+1) + '/' + str(imageData.N)
 		y = imageData.getImgVec(k)
 		mu = mu + np.dot(W[k].T,y)
 
@@ -80,7 +80,7 @@ def getloglikelihood(imageData, logDetSigma, W, invZ_x, logDetZ, mu):
 	L = L - imageData.N*M*np.log(imageData.beta)
 
 	for k in range(imageData.N):
-		print '    iteration: ' + str(k+1) + '/' + str(imageData.N)
+		# print '    iteration: ' + str(k+1) + '/' + str(imageData.N)
 		y = imageData.getImgVec(k)
 		L = L + beta*np.linalg.norm(y - np.dot(W[k],mu))**2
 	return -L[0,0]/2

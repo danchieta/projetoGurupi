@@ -100,6 +100,13 @@ def imageLikelihood(imageData, x, W, logDetZ_x, invZ_x):
 	P = P + imageData.N*np.log(2*np.pi) + logDetZ_x + np.dot(x.T, invZ_x).dot(x)
 	return (-P/2.0)[0,0]
 
+def gradImageLikelihood(imageData, x, W, invZ_x):
+	# calcula gradiente da funcao de verossimilhanca da imagem
+	L = 0
+	for k in range(imageData.N):
+		L = L + np.dot(W[k].T, imageData.getImgVec(k) - np.dot(W[k],x))
+	L = L - invZ_x.T.dot(x)
+	return L
 class ParameterEstimator:
 	def __init__(self, imageData, A = 0.04, r=1):
 		self.L = []
@@ -126,6 +133,14 @@ class ImageEstimator:
 	def getImageLikelihood(self, x):
 		return imageLikelihood(self.imageData, x, self.W, self.logDetZ_x, self.invZ_x)
 
+	def getImgLdiff(self,x):
+		return gradImageLikelihood(self.imageData, x, self.W, self.invZ_x)
+	
+	def getImgLdiff2(self): 
+		P = -self.invZ_x
+		for k in range(self.imageData.N):
+			P = P + self.W[k].T.dot(self.W[k])
+		return P
 
 class Data:
 	def __init__(self,inFolder,csvfile1, csvfile2):

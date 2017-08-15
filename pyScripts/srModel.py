@@ -137,10 +137,13 @@ class ImageEstimator:
 		return gradImageLikelihood(self.imageData, x, self.W, self.invZ_x)
 	
 	def getImgLdiff2(self): 
-		P = -self.invZ_x
-		for k in range(self.imageData.N):
-			P = P + self.W[k].T.dot(self.W[k])
-		return P
+		try:
+			return self.imgDiff2
+		except NameError:
+			self.imgDiff2 = -self.invZ_x
+			for k in range(self.imageData.N):
+				self.imgDiff2 = self.imgDiff2 + self.W[k].T.dot(self.W[k])
+			return self.imgDiff2
 
 class Data:
 	def __init__(self,inFolder,csvfile1, csvfile2):

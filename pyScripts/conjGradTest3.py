@@ -25,6 +25,7 @@ errNR = 0.02
 n = 10
 
 # The algorithm is meant to find the minimum of a function. Since we're trying to maximize a function, we adjusted the method to find the minimum of -L(x) 
+
 # definition of CG gradioent variables
 i = 0
 k = 0

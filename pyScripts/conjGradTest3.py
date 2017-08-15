@@ -59,3 +59,8 @@ while i<i_max and delta_new > (errCG**2.0)*delta0:
 
 img = x.reshape(D.getShapeHR(), order = 'f')
 imgr = img.astype(np.uint8)
+
+plt.figure()
+plt.imshow(img)
+plt.show()
+

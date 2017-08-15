@@ -105,7 +105,7 @@ def gradImageLikelihood(imageData, x, W, invZ_x):
 	L = 0
 	for k in range(imageData.N):
 		L = L + np.dot(W[k].T, imageData.getImgVec(k) - np.dot(W[k],x))
-	L = L - invZ_x.T.dot(x)
+	L = L + invZ_x.T.dot(x)
 	return L
 class ParameterEstimator:
 	def __init__(self, imageData, A = 0.04, r=1):
@@ -140,7 +140,7 @@ class ImageEstimator:
 		try:
 			return self.imgDiff2
 		except AttributeError:
-			self.imgDiff2 = -self.invZ_x
+			self.imgDiff2 = self.invZ_x
 			for k in range(self.imageData.N):
 				self.imgDiff2 = self.imgDiff2 + self.W[k].T.dot(self.W[k])
 			return self.imgDiff2

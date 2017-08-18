@@ -140,6 +140,7 @@ class ImageEstimator:
 		try:
 			return self.imgDiff2
 		except AttributeError:
+			print 'Calculanting second order differential'
 			self.imgDiff2 = self.invZ_x
 			for k in range(self.imageData.N):
 				self.imgDiff2 = self.imgDiff2 + self.W[k].T.dot(self.W[k])

@@ -136,16 +136,32 @@ class ImageEstimator:
 	def getImgLdiff(self,x):
 		return gradImageLikelihood(self.imageData, x, self.W, self.invZ_x)
 	
-	def getImgLdiff2(self): 
+	def getImgLdiff2(self, saveToDisk = False): 
+		def calcImgdiff2(self):
+			print 'Calculating second order differential'
+			imgDiff2 = self.invZ_x
+			for k in range(self.imageData.N):
+				imgDiff2 = imgDiff2 + self.W[k].T.dot(self.W[k])
+			return imgDiff2
+
 		try:
 			return self.imgDiff2
-		except AttributeError:
-			print 'Calculanting second order differential'
-			self.imgDiff2 = self.invZ_x
-			for k in range(self.imageData.N):
-				self.imgDiff2 = self.imgDiff2 + self.W[k].T.dot(self.W[k])
-			return self.imgDiff2
-
+		except:
+			if saveToDisk:
+				try:
+					# load matrix from file and return
+					diff2File= np.load('diff2.npz')
+					self.imgDiff2 = diff2File['imgDiff2']			
+					print 'Second order differential loaded from disk'
+					return self.imgDiff2
+				except:
+					# calculate and save matrix to disk
+					self.imgDiff2 = calcImgdiff2(self)# calculate diff2
+					print 'Saving second order differential to disk.'
+					np.savez('diff2.npz', imgDiff2=self.imgDiff2)
+			else:
+				self.imgDiff2 = calcImgdiff2(self)# calculate diff2
+				return self.imgDiff2# return
 class Data:
 	def __init__(self,inFolder,csvfile1, csvfile2):
 		self.inFolder = inFolder

@@ -12,17 +12,18 @@ D = srModel.Data(inFolder, csv1, csv2)
 E2 = srModel.ImageEstimator(D, D.gamma, D.theta, D.s)
 
 # initial value
-#x = np.ones((np.prod(D.getShapeHR()), 1))*128
-x = np.random.randint(0, high = 256, size=(np.prod(D.getShapeHR()),1))
+x = np.ones((np.prod(D.getShapeHR()), 1))*128
+# initial vector is set to be random 
+# x = np.random.randint(0, high = 256, size=(np.prod(D.getShapeHR()),1))
 xi = x #saving xi for further consults
 # maximum number CG of iterations
 i_max = 20
 #maximum number of Newto-raphson iterations
 j_max = 10
 # CG error tolerance
-errCG = 0.00001
+errCG = 1e-15
 # Newton-Raphson maximum number of iterations
-errNR = 1e-6
+errNR = 1e-15
 # number of iterations to restart CG algorithm
 n = 10
 
@@ -31,7 +32,7 @@ n = 10
 # definition of CG gradioent variables
 i = 0
 k = 0
-r = -E2.getImgLdiff(x)
+r = E2.getImgLdiff(x)
 d = r
 delta_new = r.T.dot(r)
 delta0 = delta_new
@@ -43,12 +44,12 @@ while i<i_max and delta_new > (errCG**2.0)*delta0:
 	
 	while True:
 		print '    j =', j
-		alpha = -(np.transpose(E2.getImgLdiff(x)).dot(d))/(np.dot(d.T,np.dot(E2.getImgLdiff2(),d)))
+		alpha = -(np.transpose(-E2.getImgLdiff(x)).dot(d))/(np.dot(d.T,np.dot(-E2.getImgLdiff2(saveToDisk = True),d)))
 		x = x+alpha[0,0]*d
 		j = j + 1
 		if not(j<j_max and (alpha**2.0)*delta_d>errNR**2.0):
 			break
-	r = -E2.getImgLdiff(x)
+	r = E2.getImgLdiff(x)
 	delta_old = delta_new
 	delta_new = r.T.dot(r)
 	beta = delta_new/delta_old

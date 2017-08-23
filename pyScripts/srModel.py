@@ -105,7 +105,7 @@ def gradImageLikelihood(imageData, x, W, invZ_x):
 	L = 0
 	for k in range(imageData.N):
 		L = L + np.dot(W[k].T, imageData.getImgVec(k) - np.dot(W[k],x))
-	L = L + invZ_x.T.dot(x)
+	L = L - (invZ_x + invZ_x.T).dot(x)/2.0
 	return L
 class ParameterEstimator:
 	def __init__(self, imageData, A = 0.04, r=1):
@@ -139,9 +139,9 @@ class ImageEstimator:
 	def getImgLdiff2(self, saveToDisk = False): 
 		def calcImgdiff2(self):
 			print 'Calculating second order differential'
-			imgDiff2 = self.invZ_x
+			imgDiff2 = -(self.invZ_x.T + self.invZ_x)/2.0
 			for k in range(self.imageData.N):
-				imgDiff2 = imgDiff2 + self.W[k].T.dot(self.W[k])
+				imgDiff2 = imgDiff2 - self.W[k].T.dot(self.W[k])
 			return imgDiff2
 
 		try:

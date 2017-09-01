@@ -9,7 +9,7 @@ csv2 = 'globalParams.csv'
 
 x = np.array(Image.open('../testIMG/imtestes.png').convert('L'))
 x = np.hstack([np.zeros((x.shape[0],1), dtype='uint8'), x, np.zeros((x.shape[0],1), dtype='uint8')])
-x = x.reshape(x.size, 1)
+x = x.reshape(x.size, 1, order='f')
 
 D = srModel.Data(inFolder, csv1, csv2)
 

@@ -131,10 +131,10 @@ class ImageEstimator:
 		self.invZ_x, self.logDetZ_x = priorCovMat(self.imageData.getShapeHR(), dtype = 'float32', savetoDisk=True)
 
 	def getImageLikelihood(self, x):
-		return imageLikelihood(self.imageData, x, self.W, self.logDetZ_x, self.invZ_x)
+		return -imageLikelihood(self.imageData, x[np.newaxis].T, self.W, self.logDetZ_x, self.invZ_x)
 
 	def getImgLdiff(self,x):
-		return gradImageLikelihood(self.imageData, x, self.W, self.invZ_x)
+		return -gradImageLikelihood(self.imageData, x[np.newaxis].T, self.W, self.invZ_x).T.squeeze()
 	
 	def getImgLdiff2(self, saveToDisk = False): 
 		def calcImgdiff2(self):

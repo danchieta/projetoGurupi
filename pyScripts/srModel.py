@@ -183,12 +183,14 @@ class Data:
 	def getImgVec(self, index):
 		img = np.array(Image.open(self.inFolder + self.filename[index]).convert('L'))
 		if not self.windowed:
-			return img.reshape(img.size,1)
+			return img.reshape((img.size,1), order = 'f')
 		else:
 			upperCorner = (np.zeros(2) - np.array(self.windowShapeLR)/2.0 + np.array(img.shape)/2.0).astype(int)
 			lowerCorner = upperCorner + np.array(self.windowShapeLR)
 			window = img[upperCorner[0]:lowerCorner[0],upperCorner[1]:lowerCorner[1]]
-			return window.reshape(window.size,1) #.reshape(window.size,1)
+			return window.reshape((window.size,1), order = 'f') #.reshape(window.size,1)
+	def getImg(self, index):
+		return Image.open(self.inFolder + self.filename[index]).convert('L')
 
 
 	def setWindowLR(self, shape):

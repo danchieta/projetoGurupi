@@ -47,9 +47,9 @@ def degradaImagem(img, gamma, theta, s, f, sigma = 4, beta = 400):
 	img = img.reshape((d.prod(),1), order = 'f')
 	dd = np.round(d*f).astype('int') #dimensoes da imagem de saida
 	v = (d/2.0) #centro da imagem 
-	y = np.zeros(dd.prod()) + np.random.randn(dd.prod(),1)*sigma #Vetor imagem resultante
+	y = np.random.randn(dd.prod(),1)*sigma #Vetor imagem resultante
 
-	W = psf(gamma, theta, s, d, dd, v) #gera uma linha imgrfuncao de espalhamento de ponto
+	W = psf(gamma, theta, s, d, dd, v) #gera matriz da funcao de espalhamento de ponto
 	y = np.dot(W,img) + np.sqrt(1/beta) #aplicacao da fucao de espalhamento de ponto
 		#print 100.0*i/dd.prod()
 

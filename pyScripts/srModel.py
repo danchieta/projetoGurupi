@@ -19,7 +19,7 @@ def priorCovMat(shapeHR, A = 0.04, r=1, dtype='float64', savetoDisk = False):
 		if not savetoDisk:
 			raise Exception()
 		covFile = np.load('priorCov.npz')
-		if covFile['A'] == A and covFile['r'] == r:
+		if covFile['A'] == A and covFile['r'] == r and covFile['invZ'].shape[0]==np.prod(shapeHR):
 			print 'Loading inverse covarianve matrix and determinant from disk.'
 			detZ = covFile['detZ']
 			invZ = covFile['invZ']

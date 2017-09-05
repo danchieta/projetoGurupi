@@ -21,7 +21,7 @@ def histEq(x, nbins = 257):
 
 # load original HR image for comparisson
 xtrue = np.array(Image.open('../testIMG/imtestes.png').convert('L'))
-xtrue = np.hstack([xtrue.mean(axis = 1)[np.newaxis].T, xtrue, xtrue.mean(axis = 1)[np.newaxis].T])
+xtrue = xtrue[0:103,:]
 xtrue = xtrue.reshape(xtrue.size, order = 'f')
 
 
@@ -45,7 +45,7 @@ E2 = srModel.ImageEstimator(D, D.gamma, D.theta, D.s)
 
 P.append(E2.getImageLikelihood(xinit))
 
-x = scipy.optimize.fmin_cg(E2.getImageLikelihood, x0, fprime = E2.getImgLdiff, callback = funcIter)
+x = scipy.optimize.fmin_cg(E2.getImageLikelihood, xinit, epsilon = 1e-15, fprime = E2.getImgLdiff, callback = funcIter)
 
 rmse3 = np.sqrt(np.sum((xtrue - x)**2.0))
 print 'RMSE of final image:', rmse3

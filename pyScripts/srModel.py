@@ -131,11 +131,25 @@ class ImageEstimator:
 		self.invZ_x, self.logDetZ_x = priorCovMat(self.imageData.getShapeHR(), dtype = 'float32', savetoDisk=True)
 
 	def getImageLikelihood(self, x):
-		return -imageLikelihood(self.imageData, x[np.newaxis].T, self.W, self.logDetZ_x, self.invZ_x)
+		if (x.shape[0] == 1):
+			# if x is a row vector
+			return -imageLikelihood(self.imageData, x[np.newaxis].T, self.W, self.logDetZ_x, self.invZ_x)
+		elif (x.shape[1] == 1):
+			# if x is a column vector
+			return -imageLikelihood(self.imageData, x, self.W, self.logDetZ_x, self.invZ_x)
+		else:
+			raise(Exception)
 
 	def getImgLdiff(self,x):
-		return -gradImageLikelihood(self.imageData, x[np.newaxis].T, self.W, self.invZ_x).T.squeeze()
-	
+		if (x.shape[0] == 1):
+			# if x is a row vector
+			return -gradImageLikelihood(self.imageData, x[np.newaxis].T, self.W, self.invZ_x).T.squeeze()
+
+		elif (x.shape[1] == 1):
+			# if x is a column vector
+			return -gradImageLikelihood(self.imageData, x, self.W, self.invZ_x)
+		else:
+			raise(Exception)
 	def getImgLdiff2(self, saveToDisk = False): 
 		def calcImgdiff2(self):
 			print 'Calculating second order differential'
@@ -145,7 +159,7 @@ class ImageEstimator:
 			return imgDiff2
 
 		try:
-			return self.imgDiff2
+			return -self.imgDiff2
 		except:
 			if saveToDisk:
 				try:
@@ -153,12 +167,13 @@ class ImageEstimator:
 					diff2File= np.load('diff2.npz')
 					self.imgDiff2 = diff2File['imgDiff2']			
 					print 'Second order differential loaded from disk'
-					return self.imgDiff2
+					return -self.imgDiff2
 				except:
 					# calculate and save matrix to disk
 					self.imgDiff2 = calcImgdiff2(self)# calculate diff2
 					print 'Saving second order differential to disk.'
 					np.savez('diff2.npz', imgDiff2=self.imgDiff2)
+					return -self.imgDiff2
 			else:
 				self.imgDiff2 = calcImgdiff2(self)# calculate diff2
 				return self.imgDiff2# return

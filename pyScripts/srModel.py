@@ -2,7 +2,8 @@ import numpy as np
 from PIL import Image
 import genModel
 
-def fmin_cg(f, fdiff, fdiff2, x0, i_max = 20, j_max = 10, errCG = 1e-3, errNR = 1e-3, n = 10, mode = 'min'):
+def fmin_cg(fdiff, fdiff2, x0, i_max = 20, j_max = 10, errCG = 1e-3, errNR = 1e-3, n = 10, mode = 'min'):
+	# find a value which minimizes a function f.
 	# i_max -  maximum number CG of iterations
 	# j_max - maximum number of Newto-raphson iterations
 	# errCG - CG error tolerance
@@ -21,13 +22,10 @@ def fmin_cg(f, fdiff, fdiff2, x0, i_max = 20, j_max = 10, errCG = 1e-3, errNR = 
 	# definition of CG gradioent variables
 	i = 0
 	k = 0
-	r = -E2.getImgLdiff(x)
+	r = -fdiff(x)
 	d = r
 	delta_new = r.T.dot(r)
 	delta0 = delta_new
-
-	# start tracking the likelihood of x
-	P = [E2.getImageLikelihood(x)]
 
 	while i<i_max and delta_new > (errCG**2.0)*delta0:
 		print 'i =', i
@@ -36,13 +34,12 @@ def fmin_cg(f, fdiff, fdiff2, x0, i_max = 20, j_max = 10, errCG = 1e-3, errNR = 
 		
 		while True:
 			print '    j =', j
-			alpha = -(E2.getImgLdiff(x).T.dot(d))/(d.T.dot(E2.getImgLdiff2(saveToDisk = True).dot(d)))
+			alpha = -(fidff(x).T.dot(d))/(d.T.dot(fdiff2(saveToDisk = True).dot(d)))
 			x = x+alpha[0,0]*d
 			j = j + 1
 			if not(j<j_max and (alpha**2.0)*delta_d>errNR**2.0):
 				break
-		P.append(E2.getImageLikelihood(x))
-		r = -E2.getImgLdiff(x)
+		r = -fdiff(x)
 		delta_old = delta_new
 		delta_new = r.T.dot(r)
 		beta = delta_new/delta_old
@@ -52,6 +49,7 @@ def fmin_cg(f, fdiff, fdiff2, x0, i_max = 20, j_max = 10, errCG = 1e-3, errNR = 
 			d = r
 			k = 0
 		i = i+1
+	return x
 
 
 def getWList(imageData, gamma, theta, s):

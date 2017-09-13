@@ -4,7 +4,7 @@ import genModel
 
 def fmin_cg(fdiff, fdiff2, x0, i_max = 20, j_max = 10, errCG = 1e-3, errNR = 1e-3, n = 10, mode = 'min'):
 	# find a value which minimizes a function f.
-	# i_max -  maximum number CG of iterations
+	# i_max - maximum number CG of iterations
 	# j_max - maximum number of Newto-raphson iterations
 	# errCG - CG error tolerance
 	# errNR - Newton-Raphson maximum number of iterations
@@ -22,7 +22,7 @@ def fmin_cg(fdiff, fdiff2, x0, i_max = 20, j_max = 10, errCG = 1e-3, errNR = 1e-
 	# definition of CG gradioent variables
 	i = 0
 	k = 0
-	r = -fdiff(x)
+	r = -o*fdiff(x)
 	d = r
 	delta_new = r.T.dot(r)
 	delta0 = delta_new
@@ -34,12 +34,12 @@ def fmin_cg(fdiff, fdiff2, x0, i_max = 20, j_max = 10, errCG = 1e-3, errNR = 1e-
 		
 		while True:
 			print '    j =', j
-			alpha = -(fidff(x).T.dot(d))/(d.T.dot(fdiff2(saveToDisk = True).dot(d)))
+			alpha = -(o*fidff(x).T.dot(d))/(d.T.dot(o*fdiff2(saveToDisk = True).dot(d)))
 			x = x+alpha[0,0]*d
 			j = j + 1
 			if not(j<j_max and (alpha**2.0)*delta_d>errNR**2.0):
 				break
-		r = -fdiff(x)
+		r = -o*fdiff(x)
 		delta_old = delta_new
 		delta_new = r.T.dot(r)
 		beta = delta_new/delta_old

@@ -12,10 +12,9 @@ D = srModel.Data(inFolder, csv1, csv2)
 E2 = srModel.ImageEstimator(D, D.gamma, D.theta, D.s)
 
 # initial value
-x = np.ones((np.prod(D.getShapeHR()), 1))*128
+x0 = np.ones((np.prod(D.getShapeHR()), 1))*128
 # initial vector is set to be random 
 # x = np.random.randint(0, high = 256, size=(np.prod(D.getShapeHR()),1))
-xi = x #saving xi for further consults
 # maximum number CG of iterations
 i_max = 20
 #maximum number of Newto-raphson iterations
@@ -27,7 +26,7 @@ errNR = 1e-3
 # number of iterations to restart CG algorithm
 n = 10
 
-x = srModel.fmin_cg(E2.
+x = srModel.fmin_cg(E2.getImgLdiff, E2.getImgLdiff2, x0)
 
 img = x.reshape(D.getShapeHR(), order = 'f')
 imgr = img.astype(np.uint8)

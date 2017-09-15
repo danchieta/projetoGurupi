@@ -34,7 +34,7 @@ def fmin_cg(fdiff, fdiff2, x0, i_max = 20, j_max = 10, errCG = 1e-3, errNR = 1e-
 		
 		while True:
 			print '    j =', j
-			alpha = -(o*fidff(x).T.dot(d))/(d.T.dot(o*fdiff2(saveToDisk = True).dot(d)))
+			alpha = -(o*fdiff(x).T.dot(d))/(d.T.dot(o*fdiff2(saveToDisk = True).dot(d)))
 			x = x+alpha[0,0]*d
 			j = j + 1
 			if not(j<j_max and (alpha**2.0)*delta_d>errNR**2.0):

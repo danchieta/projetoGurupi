@@ -91,3 +91,6 @@ ENV/
 resultIMG/*.png
 *.npz
 *.swp
+pyScripts/recycle\ bin
+tags
+degradedImg

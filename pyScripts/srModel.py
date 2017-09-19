@@ -181,8 +181,11 @@ class ImageEstimator:
 		self.invZ_x, self.logDetZ_x = priorCovMat(self.imageData.getShapeHR(), dtype = 'float32', savetoDisk=True)
 
 	def getImageLikelihood(self, x):
-		if (x.shape[0] == 1):
+		if (x.shape[0] == 1 and x.ndim > 1):
 			# if x is a row vector
+			return -imageLikelihood(self.imageData, x.T, self.W, self.logDetZ_x, self.invZ_x)
+		elif (x.ndim == 1):
+			# if x is a one-dimension row vector
 			return -imageLikelihood(self.imageData, x[np.newaxis].T, self.W, self.logDetZ_x, self.invZ_x)
 		elif (x.shape[1] == 1):
 			# if x is a column vector
@@ -191,8 +194,11 @@ class ImageEstimator:
 			raise(Exception)
 
 	def getImgLdiff(self,x):
-		if (x.shape[0] == 1):
+		if (x.shape[0] == 1 and x.ndim > 1):
 			# if x is a row vector
+			return -gradImageLikelihood(self.imageData, x.T, self.W, self.invZ_x).T.squeeze()
+		elif (x.ndim = 1):
+			# if x is a one-dimension row vector
 			return -gradImageLikelihood(self.imageData, x[np.newaxis].T, self.W, self.invZ_x).T.squeeze()
 
 		elif (x.shape[1] == 1):

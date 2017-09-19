@@ -90,3 +90,4 @@ ENV/
 
 resultIMG/*.png
 *.npz
+*.swp

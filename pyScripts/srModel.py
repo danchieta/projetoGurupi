@@ -163,7 +163,7 @@ class ParameterEstimator:
 		self.imageData = imageData
 		self.invZ_x, self.logDetZ_x = priorCovMat(self.imageData.getShapeHR(), A, r)
 
-	def likelihood(self, gamma, theta, s):
+	def likelihood(self, gamma, theta, s, sign = 1.0):
 		W = getWList(self.imageData, gamma, theta, s)
 		Sigma, logDetSigma = getSigma(W, self.invZ_x, self.imageData.beta, self.imageData.N)
 		mu = getMu(W, self.imageData, Sigma)
@@ -171,7 +171,7 @@ class ParameterEstimator:
 		L = getloglikelihood(self.imageData, logDetSigma, W, self.invZ_x, self.logDetZ_x, mu)
 		self.L.append(L)
 
-		return L
+		return sign*L
 
 class ImageEstimator:
 	def __init__(self, imageData, gamma, theta, s):
@@ -180,33 +180,33 @@ class ImageEstimator:
 
 		self.invZ_x, self.logDetZ_x = priorCovMat(self.imageData.getShapeHR(), dtype = 'float32', savetoDisk=True)
 
-	def getImageLikelihood(self, x):
+	def getImageLikelihood(self, x, sign = 1.0):
 		if (x.shape[0] == 1 and x.ndim > 1):
 			# if x is a row vector
-			return -imageLikelihood(self.imageData, x.T, self.W, self.logDetZ_x, self.invZ_x)
+			return -sign*imageLikelihood(self.imageData, x.T, self.W, self.logDetZ_x, self.invZ_x)
 		elif (x.ndim == 1):
 			# if x is a one-dimension row vector
-			return -imageLikelihood(self.imageData, x[np.newaxis].T, self.W, self.logDetZ_x, self.invZ_x)
+			return -sign*imageLikelihood(self.imageData, x[np.newaxis].T, self.W, self.logDetZ_x, self.invZ_x)
 		elif (x.shape[1] == 1):
 			# if x is a column vector
-			return -imageLikelihood(self.imageData, x, self.W, self.logDetZ_x, self.invZ_x)
+			return -sign*imageLikelihood(self.imageData, x, self.W, self.logDetZ_x, self.invZ_x)
 		else:
 			raise(Exception)
 
-	def getImgLdiff(self,x):
+	def getImgLdiff(self,x , sign = 1.0):
 		if (x.shape[0] == 1 and x.ndim > 1):
 			# if x is a row vector
-			return -gradImageLikelihood(self.imageData, x.T, self.W, self.invZ_x).T.squeeze()
+			return -sign*gradImageLikelihood(self.imageData, x.T, self.W, self.invZ_x).T.squeeze()
 		elif (x.ndim = 1):
 			# if x is a one-dimension row vector
-			return -gradImageLikelihood(self.imageData, x[np.newaxis].T, self.W, self.invZ_x).T.squeeze()
+			return -sign*gradImageLikelihood(self.imageData, x[np.newaxis].T, self.W, self.invZ_x).T.squeeze()
 
 		elif (x.shape[1] == 1):
 			# if x is a column vector
-			return -gradImageLikelihood(self.imageData, x, self.W, self.invZ_x)
+			return -sign*gradImageLikelihood(self.imageData, x, self.W, self.invZ_x)
 		else:
 			raise(Exception)
-	def getImgLdiff2(self, saveToDisk = False): 
+	def getImgLdiff2(self, saveToDisk = False, sign = 1.0): 
 		def calcImgdiff2(self):
 			print 'Calculating second order differential'
 			imgDiff2 = -(self.invZ_x.T + self.invZ_x)/2.0
@@ -215,7 +215,7 @@ class ImageEstimator:
 			return imgDiff2
 
 		try:
-			return -self.imgDiff2
+			return sign*self.imgDiff2
 		except:
 			if saveToDisk:
 				try:
@@ -223,16 +223,16 @@ class ImageEstimator:
 					diff2File= np.load('diff2.npz')
 					self.imgDiff2 = diff2File['imgDiff2']			
 					print 'Second order differential loaded from disk'
-					return -self.imgDiff2
+					return sign*self.imgDiff2
 				except:
 					# calculate and save matrix to disk
 					self.imgDiff2 = calcImgdiff2(self)# calculate diff2
 					print 'Saving second order differential to disk.'
 					np.savez('diff2.npz', imgDiff2=self.imgDiff2)
-					return -self.imgDiff2
+					return sign*self.imgDiff2
 			else:
 				self.imgDiff2 = calcImgdiff2(self)# calculate diff2
-				return self.imgDiff2# return
+				return sign*self.imgDiff2# return
 class Data:
 	def __init__(self,inFolder,csvfile1, csvfile2):
 		self.inFolder = inFolder

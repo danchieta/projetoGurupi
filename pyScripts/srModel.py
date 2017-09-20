@@ -2,7 +2,7 @@ import numpy as np
 from PIL import Image
 import genModel
 
-def fmin_cg(fdiff, fdiff2, x0, i_max = 20, j_max = 10, errCG = 1e-3, errNR = 1e-3, n = 10, mode = 'min'):
+def fmin_cg(fdiff, fdiff2, x0, i_max = 20, j_max = 10, errCG = 1e-3, errNR = 1e-3, n = 10):
 	# find a value which minimizes a function f.
 	# i_max - maximum number CG of iterations
 	# j_max - maximum number of Newto-raphson iterations
@@ -10,19 +10,12 @@ def fmin_cg(fdiff, fdiff2, x0, i_max = 20, j_max = 10, errCG = 1e-3, errNR = 1e-
 	# errNR - Newton-Raphson maximum number of iterations
 	# n - number of iterations to restart CG algorithm
 
-	if mode == 'min':
-		o = 1
-	elif mode == 'max':
-		o = -1
-	else:
-		raise
-
 	# initial value
 	x = x0
 	# definition of CG gradioent variables
 	i = 0
 	k = 0
-	r = -o*fdiff(x)
+	r = -fdiff(x)
 	d = r
 	delta_new = r.T.dot(r)
 	delta0 = delta_new
@@ -34,12 +27,12 @@ def fmin_cg(fdiff, fdiff2, x0, i_max = 20, j_max = 10, errCG = 1e-3, errNR = 1e-
 		
 		while True:
 			print '    j =', j
-			alpha = -(o*fdiff(x).T.dot(d))/(d.T.dot(o*fdiff2(saveToDisk = True).dot(d)))
+			alpha = -(fdiff(x).T.dot(d))/(d.T.dot(fdiff2(saveToDisk = True).dot(d)))
 			x = x+alpha[0,0]*d
 			j = j + 1
 			if not(j<j_max and (alpha**2.0)*delta_d>errNR**2.0):
 				break
-		r = -o*fdiff(x)
+		r = -fdiff(x)
 		delta_old = delta_new
 		delta_new = r.T.dot(r)
 		beta = delta_new/delta_old

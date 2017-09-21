@@ -150,6 +150,17 @@ def gradImageLikelihood(imageData, x, W, invZ_x):
 		L = L + np.dot(W[k].T, imageData.getImgVec(k) - np.dot(W[k],x))
 	L = L - (invZ_x + invZ_x.T).dot(x)/2.0
 	return L
+
+def vectorizeParameters(gamma, theta, s):
+	v = np.hstack([gamma, theta[:], s[0,:], s[1,:]])
+	return v
+
+def unvectorizeParameters(x, N):
+	gamma = x[0]
+	theta = x[1:1+N]
+	s = np.array([x[1+N: 1 + 2*N],x[1 + 2*N: 1 + 3*N]])
+	return gamma, theta, s	
+
 class ParameterEstimator:
 	def __init__(self, imageData, A = 0.04, r=1):
 		self.L = []
@@ -165,6 +176,10 @@ class ParameterEstimator:
 		self.L.append(L)
 
 		return sign*L
+	def vectorizedLikelihood(self, x, sign=1.0):
+		gamma = x[0]
+		theta = x[1:1+self.imageData.N]
+		s = np.array([x[1+self.imageData.N: 1 + 2*self.imageData.N],x[1 + 2*self.imageData.N: 1 + 3*self.imageData.N]])
 
 class ImageEstimator:
 	def __init__(self, imageData, gamma, theta, s):

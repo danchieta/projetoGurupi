@@ -176,30 +176,31 @@ class ImageEstimator:
 	def getImageLikelihood(self, x, sign = 1.0):
 		if (x.shape[0] == 1 and x.ndim > 1):
 			# if x is a row vector
-			return -sign*imageLikelihood(self.imageData, x.T, self.W, self.logDetZ_x, self.invZ_x)
+			return sign*imageLikelihood(self.imageData, x.T, self.W, self.logDetZ_x, self.invZ_x)
 		elif (x.ndim == 1):
 			# if x is a one-dimension row vector
-			return -sign*imageLikelihood(self.imageData, x[np.newaxis].T, self.W, self.logDetZ_x, self.invZ_x)
+			return sign*imageLikelihood(self.imageData, x[np.newaxis].T, self.W, self.logDetZ_x, self.invZ_x)
 		elif (x.shape[1] == 1):
 			# if x is a column vector
-			return -sign*imageLikelihood(self.imageData, x, self.W, self.logDetZ_x, self.invZ_x)
+			return sign*imageLikelihood(self.imageData, x, self.W, self.logDetZ_x, self.invZ_x)
 		else:
 			raise(Exception)
 
 	def getImgLdiff(self,x , sign = 1.0):
 		if (x.shape[0] == 1 and x.ndim > 1):
 			# if x is a row vector
-			return -sign*gradImageLikelihood(self.imageData, x.T, self.W, self.invZ_x).T.squeeze()
-		elif (x.ndim = 1):
+			return sign*gradImageLikelihood(self.imageData, x.T, self.W, self.invZ_x).T.squeeze()
+		elif (x.ndim == 1):
 			# if x is a one-dimension row vector
-			return -sign*gradImageLikelihood(self.imageData, x[np.newaxis].T, self.W, self.invZ_x).T.squeeze()
+			return sign*gradImageLikelihood(self.imageData, x[np.newaxis].T, self.W, self.invZ_x).T.squeeze()
 
 		elif (x.shape[1] == 1):
 			# if x is a column vector
-			return -sign*gradImageLikelihood(self.imageData, x, self.W, self.invZ_x)
+			return sign*gradImageLikelihood(self.imageData, x, self.W, self.invZ_x)
 		else:
 			raise(Exception)
-	def getImgLdiff2(self, saveToDisk = False, sign = 1.0): 
+
+	def getImgLdiff2(self, x, sign = 1.0, saveToDisk = True): 
 		def calcImgdiff2(self):
 			print 'Calculating second order differential'
 			imgDiff2 = -(self.invZ_x.T + self.invZ_x)/2.0

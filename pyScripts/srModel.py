@@ -89,20 +89,20 @@ def priorCovMat(shapeHR, A = 0.04, r=1, dtype='float64', savetoDisk = False):
 	return invZ, detZ
 
 def getSigma(W, invZ, beta, N):
-	print 'Computing Sigma/covariance matrix of the posterior distribution'	
+	# print 'Computing Sigma/covariance matrix of the posterior distribution'	
 	Sigma = invZ
 
 	for k in range(N):
 		# print '    iteration: ' + str(k+1) + '/' + str(N)
 		Sigma = Sigma + beta*np.dot(W[k].T,W[k])
 
-	print '    Computing log determinant'
+	# print '    Computing log determinant'
 	sign, detSigma = np.linalg.slogdet(Sigma)
 
 	return Sigma, detSigma
 
 def getMu(W, imageData, Sigma):
-	print 'Computing mu/mean vector of the posterior distribution'
+	# print 'Computing mu/mean vector of the posterior distribution'
 	mu = np.zeros((imageData.getShapeHR().prod(),1))
 
 	for k in range(imageData.N):
@@ -113,7 +113,7 @@ def getMu(W, imageData, Sigma):
 	return imageData.beta*(np.dot(Sigma,mu))
 
 def getloglikelihood(imageData, logDetSigma, W, invZ_x, logDetZ, mu):
-	print 'Computing L/log likelihood function'
+	# print 'Computing L/log likelihood function'
 	
 	beta = imageData.beta
 	M = np.round(imageData.getShapeHR()*imageData.f).prod()
@@ -176,10 +176,12 @@ class ParameterEstimator:
 		self.L.append(L)
 
 		return sign*L
+
 	def vectorizedLikelihood(self, x, sign=1.0):
 		gamma = x[0]
 		theta = x[1:1+self.imageData.N]
 		s = np.array([x[1+self.imageData.N: 1 + 2*self.imageData.N],x[1 + 2*self.imageData.N: 1 + 3*self.imageData.N]])
+		return self.likelihood(gamma, theta, s, sign)
 
 class ImageEstimator:
 	def __init__(self, imageData, gamma, theta, s):

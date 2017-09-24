@@ -151,15 +151,36 @@ def gradImageLikelihood(imageData, x, W, invZ_x):
 	L = L - (invZ_x + invZ_x.T).dot(x)/2.0
 	return L
 
-def vectorizeParameters(gamma, theta, s):
-	v = np.hstack([gamma, theta[:], s[0,:], s[1,:]])
+def vectorizeParameters(gamma = None, theta = None, s = None):
+	v = np.array([])
+	if gamma == None and theta == None and s == None:
+		raise Exception('Must provide at least one parameter')
+
+	if gamma != None:
+		v = np.hstack([v, gamma])
+	if theta != None:
+		v = np.hstack([v, theta])
+	if s != None:
+		v = np.hstack([v, s[0,:], s[1,:]])
 	return v
 
-def unvectorizeParameters(x, N):
-	gamma = x[0]
-	theta = x[1:1+N]
-	s = np.array([x[1+N: 1 + 2*N],x[1 + 2*N: 1 + 3*N]])
-	return gamma, theta, s	
+def unvectorizeParameters(x, N, params = ('gamma', 'theta', 's')):
+	n = 0
+	result = list()
+	for p in params:
+		if p == 'gamma':
+			gamma = x[0]
+			result.append(gamma)
+			n += 1
+		elif p =='theta':
+			theta = x[n : n + N]
+			result.append(theta)
+			n += N
+		elif p == 's':
+			s = np.vstack([x[n : n + N], x[n + N : n + 2*N]])
+			result.append(s)
+			n += 2*N
+	return tuple(result)
 
 class ParameterEstimator:
 	def __init__(self, imageData, A = 0.04, r=1):
@@ -177,10 +198,23 @@ class ParameterEstimator:
 
 		return sign*L
 
-	def vectorizedLikelihood(self, x, sign=1.0):
-		gamma = x[0]
-		theta = x[1:1+self.imageData.N]
-		s = np.array([x[1+self.imageData.N: 1 + 2*self.imageData.N],x[1 + 2*self.imageData.N: 1 + 3*self.imageData.N]])
+	def vectorizedLikelihood(self, x, sign=1.0, gamma = None, theta = None, s = None):
+		params = ['gamma', 'theta', 's']
+		count = 0
+		if gamma != None:
+			params.remove('gamma')
+			count += 1
+		if theta != None:
+			params.remove('theta')
+			count += 1
+		if s != None:
+			params.remove('s')
+			count += 1	
+		tup = unvectorizeParameters(x, self.imageData.N, tuple(params))
+		
+		for p, value in zip(params, tup):
+			exec(p + '= value')	
+		
 		return self.likelihood(gamma, theta, s, sign)
 
 class ImageEstimator:

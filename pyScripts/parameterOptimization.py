@@ -24,15 +24,16 @@ D.setWindowLR(windowshape)
 E2 = srModel.ParameterEstimator(D)
 
 # defining initial parameters
-gamma0 = 4 # tamanho da funcao de espalhamento de ponto
+gamma0 = 2 # tamanho da funcao de espalhamento de ponto
 s0 = np.random.rand(2,D.N)*8-4 #deslocamento da imagem
 theta0 = (np.random.rand(D.N)*16-8)*np.pi/180 #angulo de rotacao (com variancia de pi/100)
 
 #initial vector with the parameters
-v0 = srModel.vectorizeParameters(gamma0, theta0, s0)
+v0 = srModel.vectorizeParameters(gamma0, None, s0)
+gamma, s = srModel.unvectorizeParameters(v0, D.N, ('gamma', 's'))
 
 # vector with true parameters
-vtrue = srModel.vectorizeParameters(D.gamma, D.theta, D.s)
+vtrue = srModel.vectorizeParameters(None , D.theta, D.s)
 
 # norm of the error before algorithm
 err_before = np.linalg.norm(v0-vtrue)

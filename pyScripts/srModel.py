@@ -151,17 +151,11 @@ def gradImageLikelihood(imageData, x, W, invZ_x):
 	L = L - (invZ_x + invZ_x.T).dot(x)/2.0
 	return L
 
-def vectorizeParameters(gamma = None, theta = None, s = None):
+def vectorizeParameters(*args):
 	v = np.array([])
-	if gamma == None and theta == None and s == None:
-		raise Exception('Must provide at least one parameter')
+	for p in args:
+		v = np.hstack([v, np.array(p).flatten()])
 
-	if gamma != None:
-		v = np.hstack([v, gamma])
-	if theta != None:
-		v = np.hstack([v, theta])
-	if s != None:
-		v = np.hstack([v, s[0,:], s[1,:]])
 	return v
 
 def unvectorizeParameters(x, N, params = ('gamma', 'theta', 's')):
@@ -200,16 +194,13 @@ class ParameterEstimator:
 
 	def vectorizedLikelihood(self, x, sign=1.0, gamma = None, theta = None, s = None):
 		params = ['gamma', 'theta', 's']
-		count = 0
 		if gamma != None:
 			params.remove('gamma')
-			count += 1
 		if theta != None:
 			params.remove('theta')
-			count += 1
 		if s != None:
 			params.remove('s')
-			count += 1	
+
 		tup = unvectorizeParameters(x, self.imageData.N, tuple(params))
 		
 		for p, value in zip(params, tup):

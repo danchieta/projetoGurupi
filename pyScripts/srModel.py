@@ -194,11 +194,11 @@ class ParameterEstimator:
 
 	def vectorizedLikelihood(self, x, sign=1.0, gamma = None, theta = None, s = None):
 		params = ['gamma', 'theta', 's']
-		if gamma != None:
+		if gamma is not None:
 			params.remove('gamma')
-		if theta != None:
+		if theta is not None:
 			params.remove('theta')
-		if s != None:
+		if s is not None:
 			params.remove('s')
 
 		tup = unvectorizeParameters(x, self.imageData.N, tuple(params))

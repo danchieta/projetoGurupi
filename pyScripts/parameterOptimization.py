@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import srModel
 import scipy.optimize
+import datetime
 
 
 def func(v):
@@ -17,7 +18,7 @@ D = srModel.Data(inFolder, csv1, csv2)
 
 # use just a small window of the image to compute parameters
 # reducing computational cost
-windowshape = (9,9)
+windowshape = (11,15)
 D.setWindowLR(windowshape)
 
 # create parameter estimator object
@@ -79,6 +80,7 @@ print 'Error after algorithm:', err_after
 
 # Unpack parameters 
 theta_a, s_a = srModel.unvectorizeParameters(v, D.N, ('theta', 's'))
+np.savez('parameters '+str(datetime.datetime.now())+'.npz', theta_a = theta_a, s_a = s_a, windowshape = np.array(windowshape))
 
 err_theta = np.linalg.norm(D.theta - theta_a)
 print 'Error theta:', err_theta
@@ -92,7 +94,9 @@ P = -np.abs(np.array(P))
 plt.figure(1)
 plt.scatter(D.s[0,:], D.s[1,:], marker = 'o', label = 'True shifts')
 plt.scatter(s_a[0,:], s_a[1,:], marker = '^', label = 'Estimated shifts')
-plt.legend(loc = 4)
+for k in range(D.N):
+	plt.plot([D.s[0,k],s_a[0,k]],[D.s[1,k],s_a[1,k]], 'k--')
+plt.legend(loc = 0)
 plt.title('True shifts versus estimated shifts')
 plt.show()
 

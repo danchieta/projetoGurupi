@@ -91,7 +91,8 @@ print 'Error after algorithm:', err_after
 
 # Unpack parameters 
 theta_a, s_a = srModel.unvectorizeParameters(v, D.N, ('theta', 's'))
-np.savez('parameters '+str(datetime.datetime.now())+'.npz', theta_a = theta_a, s_a = s_a,
+t_now = str(datetime.datetime.now())[0:-7].replace(':','')
+np.savez('parameters '+t_now+'.npz', theta_a = theta_a, s_a = s_a,
 	windowshape = np.array(windowshape), norms_step1 = norms_step1, norms_step2 = norms_step2)
 
 err_theta = np.linalg.norm(D.theta - theta_a)
@@ -116,8 +117,12 @@ plt.plot(P)
 
 plt.figure(3)
 plt.plot(norms_step1)
+plt.title('Distance from expected result during optimization of $\mathbf{s}_k$')
+plt.xlabel('iteration')
 
 plt.figure(4)
 plt.plot(norms_step2)
+plt.title('Distance from expected result during optimization of $\mathbf{s}_k$ and $\theta$')
+plt.xlabel('iteration')
 
 plt.show()

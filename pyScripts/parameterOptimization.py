@@ -4,10 +4,15 @@ import srModel
 import scipy.optimize
 import datetime
 
+norms = list()
 
 def func(v):
+	global norms
+	n = np.linalg.norm(v-vtrue)
+	norms = np.hstack([norms, n])
 	print 'iteration'
-	print 'Current norm:', np.linalg.norm(v-vtrue)
+	print 'Current norm:', n
+
 
 inFolder = '../degradedImg/'
 csv1 = 'paramsImage.csv'
@@ -18,7 +23,7 @@ D = srModel.Data(inFolder, csv1, csv2)
 
 # use just a small window of the image to compute parameters
 # reducing computational cost
-windowshape = (11,15)
+windowshape = (7,7)
 D.setWindowLR(windowshape)
 
 # create parameter estimator object
@@ -51,6 +56,9 @@ v, L, _, _, _ = scipy.optimize.fmin_cg(E2.vectorizedLikelihood, v0, args = (-1, 
 
 P.append(L)
 
+norms_step1 = norms
+norms = list()
+
 # recover s from the vector
 s_a = srModel.unvectorizeParameters(v, D.N, ('s'))
 # norm of the error after algorithm
@@ -74,13 +82,17 @@ v, L, _, _, _ = scipy.optimize.fmin_cg(E2.vectorizedLikelihood, v0, args = (-1, 
 
 P.append(L)
 
+norms_step2 = norms
+norms = list()
+
 # norm of the error after algorithm
 err_after = np.linalg.norm(v-vtrue)
 print 'Error after algorithm:', err_after
 
 # Unpack parameters 
 theta_a, s_a = srModel.unvectorizeParameters(v, D.N, ('theta', 's'))
-np.savez('parameters '+str(datetime.datetime.now())+'.npz', theta_a = theta_a, s_a = s_a, windowshape = np.array(windowshape))
+np.savez('parameters '+str(datetime.datetime.now())+'.npz', theta_a = theta_a, s_a = s_a,
+	windowshape = np.array(windowshape), norms_step1 = norms_step1, norms_step2 = norms_step2)
 
 err_theta = np.linalg.norm(D.theta - theta_a)
 print 'Error theta:', err_theta
@@ -98,8 +110,14 @@ for k in range(D.N):
 	plt.plot([D.s[0,k],s_a[0,k]],[D.s[1,k],s_a[1,k]], 'k--')
 plt.legend(loc = 0)
 plt.title('True shifts versus estimated shifts')
-plt.show()
 
 plt.figure(2)
 plt.plot(P)
+
+plt.figure(3)
+plt.plot(norms_step1)
+
+plt.figure(4)
+plt.plot(norms_step2)
+
 plt.show()

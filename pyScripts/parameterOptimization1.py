@@ -26,7 +26,7 @@ D = srModel.Data(inFolder, csv1, csv2)
 
 # use just a small window of the image to compute parameters
 # reducing computational cost
-windowshape = (7,7)
+windowshape = (9,9)
 D.setWindowLR(windowshape)
 
 # create parameter estimator object
@@ -85,9 +85,17 @@ plt.legend(loc = 0)
 plt.title('True shifts versus estimated shifts')
 
 plt.figure(2)
+plt.plot(np.ones(P.size)*E2.likelihood(D.gamma, D.theta, D.s), 'r-', label = 'Likelihood of the true parameters')
 plt.plot(P)
+plt.title('Progression of the likelihood of current solution during CG algorithm', y = 1.05)
+plt.xlabel('iteration')
+plt.ylabel('$p(\gamma, \theta_k, \mathbf{s}_k | y)$ at iteration')
+plt.legend(loc = 0)
 
 plt.figure(3)
 plt.plot(norms)
+plt.title('Distance from correct solution')
+plt.xlabel('iteration')
+plt.ylabel('$|v_{current} - v_{true}|$')
 
 plt.show()

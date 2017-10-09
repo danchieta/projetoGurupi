@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import numpy as np
 import matplotlib.pyplot as plt
 import srModel
@@ -26,7 +28,7 @@ D = srModel.Data(inFolder, csv1, csv2)
 
 # use just a small window of the image to compute parameters
 # reducing computational cost
-windowshape = (9,9)
+windowshape = (6,9)
 D.setWindowLR(windowshape)
 
 # create parameter estimator object
@@ -42,6 +44,8 @@ theta0 = (np.random.rand(D.N)*8-4)*np.pi/180 #angulo de rotacao (com variancia d
 # =========================
 # Build a new initial vector using the shifts from the previous step
 v0 = srModel.vectorizeParameters(theta0, s0)
+# v0 = np.load('vectors.npz')['v_a']
+v0 = np.zeros(v0.size)
 
 # Calculate the likelihood of the initial
 P.append(E2.vectorizedLikelihood(v0, 1, gamma0))
@@ -54,7 +58,7 @@ norms = np.hstack([norms, np.linalg.norm(vtrue-v0)])
 print 'Error before shifts AND theta optimization:', norms[-1]
 
 # Optimize shifts and rotations
-v = scipy.optimize.fmin_cg(E2.vectorizedLikelihood, v0, args = (-1, gamma0), callback = func, maxiter = 20)
+v = scipy.optimize.fmin_cg(E2.vectorizedLikelihood, v0, args = (-1, gamma0), callback = func, epsilon = 1e-10, maxiter = 35)
 
 # END OF CONJUGATE GRADIENTS ALGORITHM
 # ====================================
@@ -76,26 +80,30 @@ print err_s[np.newaxis].T
 
 P = -np.abs(np.array(P))
 
-plt.figure(1)
-plt.scatter(D.s[0,:], D.s[1,:], marker = 'o', label = 'True shifts')
-plt.scatter(s_a[0,:], s_a[1,:], marker = '^', label = 'Estimated shifts')
+fig1, ax1 = plt.subplots(1,2)
+ax1[0].scatter(D.s[0,:], D.s[1,:], marker = 'o', label = u'Valores reais')
+ax1[0].scatter(s_a[0,:], s_a[1,:], marker = '^', label = u'Valores estimados')
 for k in range(D.N):
-	plt.plot([D.s[0,k],s_a[0,k]],[D.s[1,k],s_a[1,k]], 'k--')
+	ax1[0].plot([D.s[0,k],s_a[0,k]],[D.s[1,k],s_a[1,k]], 'k--')
 plt.legend(loc = 0)
-plt.title('True shifts versus estimated shifts')
+ax1[0].set_title(u'Comparação entre deslocamentos estimados e deslocamentos reais')
 
-plt.figure(2)
-plt.plot(np.ones(P.size)*E2.likelihood(D.gamma, D.theta, D.s), 'r-', label = 'Likelihood of the true parameters')
-plt.plot(P)
-plt.title('Progression of the likelihood of current solution during CG algorithm', y = 1.05)
-plt.xlabel('iteration')
-plt.ylabel('$p(\gamma, \theta_k, \mathbf{s}_k | y)$ at iteration')
-plt.legend(loc = 0)
+ax1[1].bar(np.arange(D.N), D.theta, 0.25)
+ax1[1].bar(np.arange(D.N)+0.25, theta_a, 0.25)
 
-plt.figure(3)
+fig2, ax2 = plt.subplots()
+ax2.plot(np.ones(P.size)*E2.likelihood(D.gamma, D.theta, D.s), 'r-', label = 'Verossimilhança dos parâmetros reais'.decode('utf8'))
+ax2.plot(P, label = 'Verossimilhança dos parâmetros estimados'.decode('utf8'))
+ax2.set_title(u'Progressão do valor de verossimilhança durante\n a execução do algorítmo de gradientes conjugados', y = 1.0)
+xticks2 = ax2.set_xticks(range(P.size))
+ax2.set_xlabel(u'Iteração')
+# plt.ylabel('$p(\gamma, \theta_k, \mathbf{s}_k | y)$ at iteration')
+ax2.legend(loc = 0)
+
+fig3, ax = plt.subplots()
 plt.plot(norms)
-plt.title('Distance from correct solution')
-plt.xlabel('iteration')
-plt.ylabel('$|v_{current} - v_{true}|$')
+plt.title(u'Distância para a solução correta')
+plt.xlabel(u'Iteração')
+plt.ylabel('$|v_{atual} - v_{real}|$')
 
 plt.show()

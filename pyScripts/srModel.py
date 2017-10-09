@@ -47,11 +47,12 @@ def fmin_cg(fdiff, fdiff2, x0, i_max = 20, j_max = 10, errCG = 1e-3, errNR = 1e-
 
 def getWList(imageData, gamma, theta, s):
 	shapei = imageData.getShapeHR()
-	shapeo = np.round(shapei*imageData.f).astype('int')
+	shapeo = imageData.getShapeLR() 
 	v = (shapei/2.0) #centro da imagem 
 	W = []
 	for k in range(imageData.N):
 		W.append(genModel.psf(gamma, theta[k], s[:,k], shapei, shapeo, v))
+		print 'Sign of the determinant:', sign
 	return W
 
 def priorCovMat(shapeHR, A = 0.04, r=1, dtype='float64', savetoDisk = False):
@@ -116,7 +117,7 @@ def getloglikelihood(imageData, logDetSigma, W, invZ_x, logDetZ, mu):
 	# print 'Computing L/log likelihood function'
 	
 	beta = imageData.beta
-	M = np.round(imageData.getShapeHR()*imageData.f).prod()
+	M = np.prod(imageData.getShapeLR())
 	L = np.dot(np.dot(mu.T,invZ_x),mu)
 	L = L + logDetZ
 	L = L - logDetSigma

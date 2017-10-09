@@ -28,8 +28,9 @@ D = srModel.Data(inFolder, csv1, csv2)
 
 # use just a small window of the image to compute parameters
 # reducing computational cost
-windowshape = (6,9)
+windowshape = (4,4)
 D.setWindowLR(windowshape)
+D.f = 1.0
 
 # create parameter estimator object
 E2 = srModel.ParameterEstimator(D)
@@ -58,7 +59,7 @@ norms = np.hstack([norms, np.linalg.norm(vtrue-v0)])
 print 'Error before shifts AND theta optimization:', norms[-1]
 
 # Optimize shifts and rotations
-v = scipy.optimize.fmin_cg(E2.vectorizedLikelihood, v0, args = (-1, gamma0), callback = func, epsilon = 1e-10, maxiter = 35)
+v = scipy.optimize.fmin_cg(E2.vectorizedLikelihood, v0, args = (-1.0, gamma0), callback = func, epsilon = 1e-10, maxiter = 35)
 
 # END OF CONJUGATE GRADIENTS ALGORITHM
 # ====================================
@@ -85,7 +86,7 @@ ax1[0].scatter(D.s[0,:], D.s[1,:], marker = 'o', label = u'Valores reais')
 ax1[0].scatter(s_a[0,:], s_a[1,:], marker = '^', label = u'Valores estimados')
 for k in range(D.N):
 	ax1[0].plot([D.s[0,k],s_a[0,k]],[D.s[1,k],s_a[1,k]], 'k--')
-plt.legend(loc = 0)
+ax1[0].legend(loc = 0)
 ax1[0].set_title(u'Comparação entre deslocamentos estimados e deslocamentos reais')
 
 ax1[1].bar(np.arange(D.N), D.theta, 0.25)

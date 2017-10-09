@@ -25,6 +25,7 @@ D = srModel.Data(inFolder, csv1, csv2)
 # reducing computational cost
 windowshape = (7,7)
 D.setWindowLR(windowshape)
+D.f = 1
 
 # create parameter estimator object
 E2 = srModel.ParameterEstimator(D)

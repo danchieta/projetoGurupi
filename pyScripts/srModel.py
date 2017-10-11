@@ -48,11 +48,10 @@ def fmin_cg(fdiff, fdiff2, x0, i_max = 20, j_max = 10, errCG = 1e-3, errNR = 1e-
 def getWList(imageData, gamma, theta, s):
 	shapei = imageData.getShapeHR()
 	shapeo = imageData.getShapeLR() 
-	v = (shapei/2.0) #centro da imagem 
+	v = (np.array(shapei)/2.0) #centro da imagem 
 	W = []
 	for k in range(imageData.N):
 		W.append(genModel.psf(gamma, theta[k], s[:,k], shapei, shapeo, v))
-		print 'Sign of the determinant:', sign
 	return W
 
 def priorCovMat(shapeHR, A = 0.04, r=1, dtype='float64', savetoDisk = False):
@@ -104,7 +103,7 @@ def getSigma(W, invZ, beta, N):
 
 def getMu(W, imageData, Sigma):
 	# print 'Computing mu/mean vector of the posterior distribution'
-	mu = np.zeros((imageData.getShapeHR().prod(),1))
+	mu = np.zeros((np.prod(imageData.getShapeHR()),1))
 
 	for k in range(imageData.N):
 		# print '    iteration: ' + str(k+1) + '/' + str(imageData.N)
@@ -307,12 +306,12 @@ class Data:
 
 	def getShapeLR(self):
 		if  not self.windowed:
-			return self.shapeLR
+			return tuple(self.shapeLR)
 		else:
-			return self.windowShapeLR
+			return tuple(self.windowShapeLR)
 
 	def getShapeHR(self):
 		if not self.windowed:
-			return (self.shapeLR/self.f).astype(int)
+			return tuple((self.shapeLR/self.f).astype(int))
 		else:
-			return (self.windowShapeLR/self.f).astype(int)
+			return tuple((np.array(self.windowShapeLR)/self.f).astype(int))

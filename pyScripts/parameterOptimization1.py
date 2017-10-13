@@ -28,7 +28,7 @@ D = srModel.Data(inFolder, csv1, csv2)
 
 # use just a small window of the image to compute parameters
 # reducing computational cost
-windowshape = (4,4)
+windowshape = (7,7)
 D.setWindowLR(windowshape)
 D.f = 1.0
 
@@ -89,8 +89,9 @@ for k in range(D.N):
 ax1[0].legend(loc = 0)
 ax1[0].set_title(u'Comparação entre deslocamentos estimados e deslocamentos reais')
 
-ax1[1].bar(np.arange(D.N), D.theta, 0.25)
-ax1[1].bar(np.arange(D.N)+0.25, theta_a, 0.25)
+ax1[1].bar(np.arange(D.N), D.theta, 0.25, label = u'Valores reais')
+ax1[1].bar(np.arange(D.N)+0.25, theta_a, 0.25, label = u'Valores estimados')
+ax1[1].legend(loc = 0)
 
 fig2, ax2 = plt.subplots()
 ax2.plot(np.ones(P.size)*E2.likelihood(D.gamma, D.theta, D.s), 'r-', label = 'Verossimilhança dos parâmetros reais'.decode('utf8'))

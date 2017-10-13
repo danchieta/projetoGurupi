@@ -174,7 +174,10 @@ def unvectorizeParameters(x, N, params = ('gamma', 'theta', 's')):
 			s = np.vstack([x[n : n + N], x[n + N : n + 2*N]])
 			result.append(s)
 			n += 2*N
-	return tuple(result)
+	if len(result) == 1:
+		return result[0]
+	elif len(result) > 1:
+		return tuple(result)
 
 class ParameterEstimator:
 	def __init__(self, imageData, A = 0.04, r=1):
@@ -201,11 +204,18 @@ class ParameterEstimator:
 		if s is not None:
 			params.remove('s')
 
-		tup = unvectorizeParameters(x, self.imageData.N, tuple(params))
-		
-		for p, value in zip(params, tup):
-			exec(p + '= value')	
-		
+		if len(params) == 1:
+			exec(params[0] + '= unvectorizeParameters(x, self.imageData.N, tuple(params))')
+		elif len(params) > 1:
+			# if there is more than one parameter to unpack from the vector
+			# turn the params list into a string then shape it like a tuple 
+			# definition so we can parse it into the exec command
+			strp = str(params)
+			strp = strp.replace('[','(')
+			strp = strp.replace(']',')')
+			strp = strp.replace('\'','')
+			exec(strp + '= unvectorizeParameters(x, self.imageData.N, tuple(params))')
+
 		return self.likelihood(gamma, theta, s, sign)
 
 class ImageEstimator:

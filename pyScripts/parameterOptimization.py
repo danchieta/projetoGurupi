@@ -36,7 +36,7 @@ D = srModel.Data(inFolder, csv1, csv2)
 
 # use just a small window of the image to compute parameters
 # reducing computational cost
-windowshape = (4,4)
+windowshape = (15,15)
 D.setWindowLR(windowshape)
 D.f = 1
 

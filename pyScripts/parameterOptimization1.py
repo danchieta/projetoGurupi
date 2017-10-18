@@ -40,13 +40,22 @@ E2 = srModel.ParameterEstimator(D)
 gamma0 = 2 # tamanho da funcao de espalhamento de ponto
 s0 = np.random.rand(2,D.N)*4-2 #deslocamento da imagem
 theta0 = (np.random.rand(D.N)*8-4)*np.pi/180 #angulo de rotacao (com variancia de pi/100)
+L_old = E2.likelihood(gamma0, theta0, s0)
+
+for k in range(50):
+	s0_new = np.random.rand(2,D.N)*4-2 #deslocamento da imagem
+	theta0_new = (np.random.rand(D.N)*8-4)*np.pi/180 #angulo de rotacao (com variancia de pi/100)
+	L = E2.likelihood(gamma0, theta0_new, s0_new)
+
+	if L > L_old:
+		s0 = s0_new
+		theta0 = theta0_new
+		L_old = L
 
 # Optimize shifts AND theta
 # =========================
 # Build a new initial vector using the shifts from the previous step
 v0 = srModel.vectorizeParameters(theta0, s0)
-# v0 = np.load('vectors.npz')['v_a']
-v0 = np.zeros(v0.size)
 
 # Calculate the likelihood of the initial
 P.append(E2.vectorizedLikelihood(v0, 1, gamma0))

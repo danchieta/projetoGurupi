@@ -94,7 +94,7 @@ def getSigma(W, invZ, beta, N):
 
 	for k in range(N):
 		# print '    iteration: ' + str(k+1) + '/' + str(N)
-		Sigma = Sigma + beta*np.dot(W[k].T,W[k])
+		Sigma = np.linalg.inv(Sigma + beta*np.dot(W[k].T,W[k]))
 
 	# print '    Computing log determinant'
 	sign, detSigma = np.linalg.slogdet(Sigma)

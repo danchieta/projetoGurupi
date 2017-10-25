@@ -94,7 +94,8 @@ def getSigma(W, invZ, beta, N):
 
 	for k in range(N):
 		# print '    iteration: ' + str(k+1) + '/' + str(N)
-		Sigma = np.linalg.inv(Sigma + beta*np.dot(W[k].T,W[k]))
+		Sigma = Sigma + beta*np.dot(W[k].T,W[k])
+	Sigma = np.linalg.inv(Sigma)
 
 	# print '    Computing log determinant'
 	sign, detSigma = np.linalg.slogdet(Sigma)
@@ -311,8 +312,11 @@ class Data:
 
 
 	def setWindowLR(self, shape):
-		self.windowShapeLR = shape
-		self.windowed = True
+		if shape[0] <= self.shapeLR[0] or shape[1] <= self.shapeLR[1]:
+			self.windowShapeLR = shape
+			self.windowed = True
+		else:
+			raise Exception('Window must be smaller than low resolution image')
 
 	def getShapeLR(self):
 		if  not self.windowed:

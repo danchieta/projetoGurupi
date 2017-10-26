@@ -11,20 +11,20 @@ csv2 = 'globalParams.csv'
 # create Data object
 D = srModel.Data(inFolder, csv1, csv2)
 
-ss = np.array(range(2,27,2))
+ss = np.array(range(2,10))
 L = np.array([])
 Lr = np.array([])
 
 gamma0= 2 # tamanho da funcao de espalhamento de ponto
-s0 = np.random.rand(2,D.N)*4-2 #deslocamento da imagem
-theta0 = (np.random.rand(D.N)*8-4)*np.pi/180 #angulo de rotacao (com variancia de pi/100)
+s0 = np.zeros((2,D.N)) #deslocamento da imagem
+theta0 = np.zeros(D.N) #angulo de rotacao (com variancia de pi/100)
 
 for s in ss:
 	# use just a small window of the image to compute parameters
 	# reducing computational cost
 	windowshape = (s,s)
 	D.setWindowLR(windowshape)
-	D.f = 1
+	D.f = 0.25
 
 	# create parameter estimator object
 	E2 = srModel.ParameterEstimator(D)

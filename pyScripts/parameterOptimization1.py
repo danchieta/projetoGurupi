@@ -28,17 +28,21 @@ D = srModel.Data(inFolder, csv1, csv2)
 
 # use just a small window of the image to compute parameters
 # reducing computational cost
-windowshape = (17,17)
+windowshape = (4,4)
 D.setWindowLR(windowshape)
-D.f = 1.0
+# D.f = 0.4
 
 # create parameter estimator object
 E2 = srModel.ParameterEstimator(D)
 
 gamma0 = 2
+s0 = np.zeros((2,D.N))
+theta0 = np.zeros(D.N)
 
 # defining initial parameters
-v0 = np.load('parvect1.npy')
+# v0 = np.load('parvect3.npy')
+v0 = srModel.vectorizeParameters(theta0, s0)
+
 
 # Optimize shifts AND theta
 # =========================
@@ -55,7 +59,7 @@ norms = np.hstack([norms, np.linalg.norm(vtrue-v0)])
 print 'Error before shifts AND theta optimization:', norms[-1]
 
 # Optimize shifts and rotations
-v = scipy.optimize.fmin_cg(E2.vectorizedLikelihood, v0, args = (-1.0, gamma0), callback = func, epsilon = 1e-10, maxiter = 35)
+v = scipy.optimize.fmin_cg(E2.vectorizedLikelihood, v0, args = (-1.0, gamma0), callback = func, epsilon = 1e-10, maxiter = 50)
 
 # END OF CONJUGATE GRADIENTS ALGORITHM
 # ====================================
@@ -83,24 +87,26 @@ ax1[0].scatter(s_a[0,:], s_a[1,:], marker = '^', label = u'Valores estimados')
 for k in range(D.N):
 	ax1[0].plot([D.s[0,k],s_a[0,k]],[D.s[1,k],s_a[1,k]], 'k--')
 ax1[0].legend(loc = 0)
-ax1[0].set_title(u'Comparação entre deslocamentos estimados e deslocamentos reais')
+ax1[0].set_title(u'Comparação dos parâmetros de deslocamento')
 
 ax1[1].bar(np.arange(D.N), D.theta, 0.25, label = u'Valores reais')
 ax1[1].bar(np.arange(D.N)+0.25, theta_a, 0.25, label = u'Valores estimados')
 ax1[1].legend(loc = 0)
+ax1[1].set_title(u'Comparação dos ângulos de rotação')
 
 fig2, ax2 = plt.subplots()
 ax2.plot(np.ones(P.size)*E2.likelihood(D.gamma, D.theta, D.s), 'r-', label = 'Verossimilhança dos parâmetros reais'.decode('utf8'))
 ax2.plot(P, label = 'Verossimilhança dos parâmetros estimados'.decode('utf8'))
 ax2.set_title(u'Progressão do valor de verossimilhança durante\n a execução do algorítmo de gradientes conjugados', y = 1.0)
-xticks2 = ax2.set_xticks(range(P.size))
+xticks2 = ax2.set_xticks(range(0,P.size,10))
 ax2.set_xlabel(u'Iteração')
 # plt.ylabel('$p(\gamma, \theta_k, \mathbf{s}_k | y)$ at iteration')
 ax2.legend(loc = 0)
 
-fig3, ax = plt.subplots()
+fig3, ax3 = plt.subplots()
 plt.plot(norms)
 plt.title(u'Distância para a solução correta')
+xticks3 = ax3.set_xticks(range(0,P.size,10))
 plt.xlabel(u'Iteração')
 plt.ylabel('$|v_{atual} - v_{real}|$')
 

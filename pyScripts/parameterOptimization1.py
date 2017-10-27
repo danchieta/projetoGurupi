@@ -28,7 +28,7 @@ D = srModel.Data(inFolder, csv1, csv2)
 
 # use just a small window of the image to compute parameters
 # reducing computational cost
-windowshape = (4,4)
+windowshape = (5,5)
 D.setWindowLR(windowshape)
 # D.f = 0.4
 
@@ -59,7 +59,7 @@ norms = np.hstack([norms, np.linalg.norm(vtrue-v0)])
 print 'Error before shifts AND theta optimization:', norms[-1]
 
 # Optimize shifts and rotations
-v = scipy.optimize.fmin_cg(E2.vectorizedLikelihood, v0, args = (-1.0, gamma0), callback = func, epsilon = 1e-10, maxiter = 50)
+v = scipy.optimize.fmin_cg(E2.vectorizedLikelihood, v0, args = (-1.0, gamma0), callback = func, epsilon = 1e-10, maxiter = 75)
 
 # END OF CONJUGATE GRADIENTS ALGORITHM
 # ====================================
@@ -92,7 +92,9 @@ ax1[0].set_title(u'Comparação dos parâmetros de deslocamento')
 ax1[1].bar(np.arange(D.N), D.theta, 0.25, label = u'Valores reais')
 ax1[1].bar(np.arange(D.N)+0.25, theta_a, 0.25, label = u'Valores estimados')
 ax1[1].legend(loc = 0)
+xticks11 = ax1[1].set_xticks(range(D.N))
 ax1[1].set_title(u'Comparação dos ângulos de rotação')
+ax1[1].set_xlabel(u'Imagem')
 
 fig2, ax2 = plt.subplots()
 ax2.plot(np.ones(P.size)*E2.likelihood(D.gamma, D.theta, D.s), 'r-', label = 'Verossimilhança dos parâmetros reais'.decode('utf8'))
@@ -108,6 +110,6 @@ plt.plot(norms)
 plt.title(u'Distância para a solução correta')
 xticks3 = ax3.set_xticks(range(0,P.size,10))
 plt.xlabel(u'Iteração')
-plt.ylabel('$|v_{atual} - v_{real}|$')
+plt.ylabel('$\|c_{atual} - c_{real}\|$')
 
 plt.show()

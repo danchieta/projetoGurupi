@@ -81,7 +81,6 @@ def select_wheel(fitness, pop):
 	return sort_fit(fitnessi, popi)
 
 def mate(fitnessi, popi, evfunction):
-	
 	indexes = range(len(fitnessi))
 	shuffle(indexes)
 
@@ -96,10 +95,6 @@ def mate(fitnessi, popi, evfunction):
 		childs = childs + [child1, child2]
 
 	fitness_childs, childs = evaluate(childs, evfunction)
-	print 'fitnessi type', type(fitnessi)
-	print 'fitness_childs type', type(fitness_childs)
-	print 'childs type', type(childs)
-	print 'popi type', type(popi)
 
 	return sort_fit(fitnessi + fitness_childs, popi + childs)
 	

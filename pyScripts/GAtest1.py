@@ -30,3 +30,13 @@ E2 = srModel.ParameterEstimator(D)
 
 pop = evolutionaryAlg.ini_pop(100, gen_function, args = D.N)
 fitness, pop = evolutionaryAlg.evaluate(pop, evalfunction)
+
+fitnessi, popi = evolutionaryAlg.select_wheel(fitness, pop)
+
+print 'mean fitness original population:', np.mean(fitness)
+print 'mean fitness selected population:', np.mean(fitnessi)
+
+fit_new, pop_new = evolutionaryAlg.mate(fitnessi, popi, evalfunction)
+
+print 'mean fitness selected population with childs:', np.mean(fit_new)
+

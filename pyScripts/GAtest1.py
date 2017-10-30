@@ -29,4 +29,4 @@ D.setWindowLR(windowshape)
 E2 = srModel.ParameterEstimator(D)
 
 pop = evolutionaryAlg.ini_pop(100, gen_function, args = D.N)
-fitness = evolutionaryAlg.evaluate(pop, evalfunction)
+fitness, pop = evolutionaryAlg.evaluate(pop, evalfunction)

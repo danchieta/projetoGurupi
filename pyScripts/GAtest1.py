@@ -3,7 +3,15 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import srModel
-from deap import creator, tools
+import evolutionaryAlg
+
+def gen_function(K):
+	theta = np.random.rand(K)*8-4
+	s = np.random.rand(2,K)*4-2
+	return srModel.vectorizeParameters(theta,s)
+
+def evalfunction(ind):
+	return E2.vectorizedLikelihood(ind, gamma = 2)
 
 inFolder = '../degradedImg/'
 csv1 = 'paramsImage.csv'
@@ -20,9 +28,5 @@ D.setWindowLR(windowshape)
 # create parameter estimator object
 E2 = srModel.ParameterEstimator(D)
 
-gamma0 = 2
-s0 = np.zeros((2,D.N))
-theta0 = np.zeros(D.N)
-
-# defining initial parameters
-v0 = srModel.vectorizeParameters(theta0, s0)
+pop = evolutionaryAlg.ini_pop(100, gen_function, args = D.N)
+fitness = evolutionaryAlg.evaluate(pop, evalfunction)

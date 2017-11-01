@@ -98,3 +98,13 @@ def mate(fitnessi, popi, evfunction):
 
 	return sort_fit(fitnessi + fitness_childs, popi + childs)
 	
+def mutate(fitnessi, pop, evfunction, rate = 0.01):
+	vec_bool = np.random.rand(len(fitnessi)-1) <= rate
+
+	for i in range(1,len(fitnessi)):
+		if vec_bool[i]:
+			# mutate a random gene in pop[i]
+	
+	
+
+	

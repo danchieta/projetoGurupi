@@ -28,15 +28,23 @@ D.setWindowLR(windowshape)
 # create parameter estimator object
 E2 = srModel.ParameterEstimator(D)
 
-pop = evolutionaryAlg.ini_pop(100, gen_function, args = D.N)
-fitness, pop = evolutionaryAlg.evaluate(pop, evalfunction)
+N_ga = 30
+fit_mean = np.array([])
+fit_max = np.array([])
+fit_min = np.array([])
 
-fitnessi, popi = evolutionaryAlg.select_wheel(fitness, pop)
+for i in range(20):
+	pop = evolutionaryAlg.ini_pop(100, gen_function, args = D.N)
+	fitness, pop = evolutionaryAlg.evaluate(pop, evalfunction)
 
-print 'mean fitness original population:', np.mean(fitness)
-print 'mean fitness selected population:', np.mean(fitnessi)
+	fitnessi, popi = evolutionaryAlg.select_wheel(fitness, pop)
 
-fit_new, pop_new = evolutionaryAlg.mate(fitnessi, popi, evalfunction)
+	print 'mean fitness original population:', np.mean(fitness)
+	print 'mean fitness selected population:', np.mean(fitnessi)
 
-print 'mean fitness selected population with childs:', np.mean(fit_new)
+	fitness, pop = evolutionaryAlg.mate(fitnessi, popi, evalfunction)
+
+	fit_mean = np.hstack([fit_mean, np.mean(fitness)])
+	fit_min = np.hstack([fit_min, np.min(fitness)])
+	fit_max = np.hstack([fit_max, np.max(fitness)])
 

@@ -63,8 +63,6 @@ def select_wheel(fitness, pop):
 
 	P = np.cumsum(normalize(fitness))
 
-
-
 	for i in range(N):
 		Pf = interp1d(P, range(len(fitness)))
 		# select a random index based o the fitness of each individual
@@ -98,13 +96,18 @@ def mate(fitnessi, popi, evfunction):
 
 	return sort_fit(fitnessi + fitness_childs, popi + childs)
 	
-def mutate(fitnessi, pop, evfunction, rate = 0.01):
-	vec_bool = np.random.rand(len(fitnessi)-1) <= rate
+def mutate(fitness, pop, evfunction, gen_function, args_gen = None, rate = 0.01):
+	if not issorted(fitness):
+		fitness, pop = sort_fit(fitness,pop)
+	# this vector helps to select the cromossomes that will suffer mutation
+	vec_bool = np.random.rand(len(fitness)-1) <= rate
 
-	for i in range(1,len(fitnessi)):
+	for i in range(0,len(fitness)-1):
 		if vec_bool[i]:
-			# mutate a random gene in pop[i]
-	
-	
+			j = np.random.randint(0,pop[i].size)
+			pop[i][j] = gen_function(args_gen)[j]
+			fitness[i] = evfunction(pop[i])
+
+	return sort_fit(fitness, pop)
 
 	

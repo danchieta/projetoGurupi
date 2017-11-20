@@ -2,7 +2,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import srModel
 import scipy.optimize
-
 # por que voce me esquece e some?
 # e se eu me interessar por alguem?
 # e se ela de repente me ganha?

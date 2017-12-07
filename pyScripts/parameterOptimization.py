@@ -36,17 +36,16 @@ D = srModel.Data(inFolder, csv1, csv2)
 
 # use just a small window of the image to compute parameters
 # reducing computational cost
-windowshape = (15,15)
+windowshape = (5,5)
 D.setWindowLR(windowshape)
-D.f = 1
 
 # create parameter estimator object
 E2 = srModel.ParameterEstimator(D)
 
 # defining initial parameters
 gamma0 = 2 # tamanho da funcao de espalhamento de ponto
-s0 = np.random.rand(2,D.N)*4-2 #deslocamento da imagem
-theta0 = (np.random.rand(D.N)*8-4)*np.pi/180 #angulo de rotacao (com variancia de pi/100)
+s0 = np.zeros((2,D.N)) #deslocamento da imagem
+theta0 = np.zeros(D.N) #angulo de rotacao (com variancia de pi/100)
 
 # FIRST STEP: Optimize shifts
 # ===========================
@@ -64,7 +63,7 @@ print 'Error before shifts optimization:', err_before
 P.append(E2.vectorizedLikelihood(v0, 1, gamma0, theta0))
 
 # use cg to optimize shifts
-v = scipy.optimize.fmin_cg(E2.vectorizedLikelihood, v0, args = (-1, gamma0, theta0), callback = func_step1, epsilon = 1e-10, maxiter = 190)
+v = scipy.optimize.fmin_cg(E2.vectorizedLikelihood, v0, args = (-1, gamma0, theta0), callback = func_step1, epsilon = 1e-10, maxiter = 10)
 
 # recover s from the vector
 s_a = srModel.unvectorizeParameters(v, D.N, ('s'))
@@ -85,7 +84,7 @@ err_before = np.linalg.norm(v0-vtrue)
 print 'Error before shifts AND theta optimization:', err_before
 
 # Optimize shifts and rotations
-v = scipy.optimize.fmin_cg(E2.vectorizedLikelihood, v0, args = (-1, gamma0), callback = func_step2, epsilon = 1e-10, maxiter = 350)
+v = scipy.optimize.fmin_cg(E2.vectorizedLikelihood, v0, args = (-1, gamma0), callback = func_step2, epsilon = 1e-10, maxiter = 30)
 
 # norm of the error after algorithm
 print 'Error after algorithm:', norms[-1]
@@ -96,7 +95,7 @@ P = np.array(P)
 theta_a, s_a = srModel.unvectorizeParameters(v, D.N, ('theta', 's'))
 t_now = str(datetime.datetime.now())[0:-7].replace(':','')
 np.savez('parameters '+t_now+'.npz', theta_a = theta_a, s_a = s_a,
-	windowshape = np.array(windowshape), norms = norms)
+	windowshape = np.array(windowshape), norms = norms, P = P)
 
 err_theta = np.linalg.norm(D.theta - theta_a)
 print 'Error theta:', err_theta

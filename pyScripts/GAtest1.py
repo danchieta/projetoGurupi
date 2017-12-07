@@ -30,7 +30,7 @@ E2 = srModel.ParameterEstimator(D)
 
 vtrue = srModel.vectorizeParameters(D.theta, D.s)
 
-N_ga = 170
+N_ga = 190 #number of generations in genetic algorithm
 fit_mean = np.array([])
 fit_max = np.array([])
 fit_min = np.array([])

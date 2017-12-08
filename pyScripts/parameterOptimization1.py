@@ -31,7 +31,7 @@ D = srModel.Data(inFolder, csv1, csv2)
 
 # use just a small window of the image to compute parameters
 # reducing computational cost
-windowshape = (5,5)
+windowshape = (9,9)
 D.setWindowLR(windowshape)
 # D.f = 1
 
@@ -39,8 +39,8 @@ D.setWindowLR(windowshape)
 E2 = srModel.ParameterEstimator(D)
 
 gamma0 = 2
-s0 = np.random.rand(2,D.N)+D.s
-theta0 = np.random.rand(D.N)+D.theta
+s0 = np.random.rand(2,D.N)*4-2
+theta0 = np.random.rand(D.N)*8-4
 
 # defining initial parameters
 # v0 = np.load('parvect3.npy')
@@ -85,8 +85,8 @@ print err_s[np.newaxis].T
 
 P = -np.abs(np.array(P))
 
-fig1, ax1 = vismodule.compareParPlot(s_a, theta_a, D.s, D.theta)
-fig2, ax2 = vismodule.compareParPlot(s_min, theta_min, D.s, D.theta)
+fig1, ax1 = vismodule.compareParPlot(s_a, D.s, np.abs(D.theta-theta_a))
+fig2, ax2 = vismodule.compareParPlot(s_min, D.s, np.abs(D.theta-theta_min))
 
 fig3, ax3 = vismodule.progressionPlot(P, norms, E2.likelihood(D.gamma, D.theta, D.s))
 plt.show()

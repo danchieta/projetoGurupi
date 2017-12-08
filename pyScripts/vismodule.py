@@ -14,12 +14,11 @@ def compareParPlot(s, theta, strue, thetatrue):
 	ax1[0].legend(loc = 0)
 	ax1[0].set_title(u'Comparação dos parâmetros de deslocamento')
 
-	cwidth = 0.42
+	cwidth = 0.75
 	ax1[1].bar(np.arange(theta.size), thetatrue, cwidth, label = u'Valores reais')
-	ax1[1].bar(np.arange(theta.size)+cwidth, theta, cwidth, label = u'Valores estimados')
 	ax1[1].legend(loc = 0)
 	xticks11 = ax1[1].set_xticks(range(theta.size))
-	ax1[1].set_title(u'Comparação dos ângulos de rotação')
+	ax1[1].set_title(u'Erro dos ângulos de rotação estimados')
 
 	return fig1, ax1
 

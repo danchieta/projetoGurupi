@@ -8,16 +8,14 @@ inFolder = '../degradedImg/'
 csv1 = 'paramsImage.csv'
 csv2 = 'globalParams.csv'
 
-# load the file with the parameters
-pfile = np.load('parameters 2017-10-12 220712.npz')
 
 # create Data object
 D = srModel.Data(inFolder, csv1, csv2)
 # create imge estimator object
 
 gamma = 2
-theta = pfile['theta_a']
-s = pfile['s_a']
+theta = D.theta
+s = D.s
 
 E2 = srModel.ImageEstimator(D, gamma, theta, s)
 
@@ -39,7 +37,7 @@ n = 10
 #x = srModel.fmin_cg(E2.getImgLdiff, E2.getImgLdiff2, x0)
 x = scipy.optimize.fmin_ncg(E2.getImageLikelihood, x0, fprime=E2.getImgLdiff, fhess=E2.getImgLdiff2, args = (-1.0,), epsilon = 1e-36, avextol = 1e-30)
 
-img = (D.getImgVec(1).min()+(D.getImgVec(1).max()-D.getImgVec(1).min())*(x-x.min())/(x.max()-x.min())).reshape(D.getShapeHR(), order = 'f')
+img = D.getImgVec(0).min() + ((x - x.min())*(D.getImgVec(0).max() - D.getImgVec(0).min())/(x.max() - x.min())).reshape(D.getShapeHR(), order = 'f')
 imgr = Image.fromarray(img.astype(np.uint8))
 imgr.save('result.png')
 

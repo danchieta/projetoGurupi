@@ -39,8 +39,10 @@ D.setWindowLR(windowshape)
 E2 = srModel.ParameterEstimator(D)
 
 gamma0 = 2
-s0 = np.random.rand(2,D.N)*4-2
-theta0 = np.random.rand(D.N)*8-4
+# s0 = np.random.rand(2,D.N)*4-2
+# theta0 = (np.random.rand(D.N)*8-4)*np.pi/180
+s0 = np.zeros((2,D.N))
+theta0 = np.zeros(D.N)
 
 # defining initial parameters
 # v0 = np.load('parvect3.npy')
@@ -62,7 +64,7 @@ norms = np.hstack([norms, np.linalg.norm(vtrue-v0)])
 print 'Error before shifts AND theta optimization:', norms[-1]
 
 # Optimize shifts and rotations
-v = scipy.optimize.fmin_cg(E2.vectorizedLikelihood, v0, args = (-1.0, gamma0), callback = func, epsilon = 1e-10, maxiter = 60)
+v = scipy.optimize.fmin_cg(E2.vectorizedLikelihood, v0, args = (-1.0, gamma0), callback = func, epsilon = 1e-3, maxiter = 90)
 
 # END OF CONJUGATE GRADIENTS ALGORITHM
 # ====================================
@@ -85,11 +87,12 @@ print err_s[np.newaxis].T
 
 P = -np.abs(np.array(P))
 
-fig1, ax1 = vismodule.compareParPlot(s_a, D.s, np.abs(D.theta-theta_a))
-fig2, ax2 = vismodule.compareParPlot(s_min, D.s, np.abs(D.theta-theta_min))
+vismodule.saveData(g0 = gamma0, s0 = theta0, t0 = theta0, sa = s_a, ta = theta_a, P = P, norms = norms)
+
+fig1, ax1 = vismodule.compareParPlot(s_a, D.s, np.abs(D.theta-theta_a)*180/np.pi)
+fig2, ax2 = vismodule.compareParPlot(s_min, D.s, np.abs(D.theta-theta_min)*180/np.pi)
 
 fig3, ax3 = vismodule.progressionPlot(P, norms, E2.likelihood(D.gamma, D.theta, D.s))
 plt.show()
-fig1.savefig('./outfig/figure_1.png')
-fig2.savefig('./outfig/figure_2.png')
-fig3.savefig('./outfig/figure_3.png')
+
+vismodule.saveFigures(fig1, fig2, fig3)

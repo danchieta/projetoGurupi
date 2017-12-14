@@ -17,7 +17,7 @@ def func(v):
 	norms = np.hstack([norms, n])
 	if n == norms.min():
 		v_min = v
-	P.append(E2.vectorizedLikelihood(v, 1, gamma = gamma0))
+	P.append(E2.vectorizedLikelihood(v, 1, gamma = gamma0, s = s0))
 	print 'iteration'
 	print 'Current norm:', n
 
@@ -31,7 +31,7 @@ D = srModel.Data(inFolder, csv1, csv2)
 
 # use just a small window of the image to compute parameters
 # reducing computational cost
-windowshape = (7,7)
+windowshape = (5,5)
 D.setWindowLR(windowshape)
 # D.f = 1
 
@@ -41,30 +41,30 @@ E2 = srModel.ParameterEstimator(D)
 gamma0 = 2
 # s0 = np.random.rand(2,D.N)*4-2
 # theta0 = (np.random.rand(D.N)*8-4)*np.pi/180
-s0 = np.zeros((2,D.N))
+s0 = D.s
 theta0 = np.zeros(D.N)
 
 # defining initial parameters
 # v0 = np.load('parvect3.npy')
-v0 = srModel.vectorizeParameters(theta0, s0)
+v0 = srModel.vectorizeParameters(theta0)
 
 
-# Optimize shifts AND theta
-# =========================
-# Build a new initial vector using the shifts from the previous step
+# Optimize just theta
+# ===================
 
 # Calculate the likelihood of the initial
-P.append(E2.vectorizedLikelihood(v0, 1, gamma0))
+P.append(E2.vectorizedLikelihood(v0, 1, gamma0, None, s0))
 
 # vector with true shifts and angles
-vtrue = srModel.vectorizeParameters(D.theta, D.s)
+vtrue = srModel.vectorizeParameters(D.theta)
 
 # norm of the error before algorithm
 norms = np.hstack([norms, np.linalg.norm(vtrue-v0)])
 print 'Error before shifts AND theta optimization:', norms[-1]
 
-# Optimize shifts and rotations
-v = scipy.optimize.fmin_cg(E2.vectorizedLikelihood, v0, args = (-1.0, gamma0), gtol = 1.5e5, callback = func, epsilon = 1e-2, maxiter = 90)
+# Optimize rotations
+v = scipy.optimize.fmin_cg(E2.vectorizedLikelihood, v0, args = (-1.0, gamma0, None, s0), callback = func, epsilon = 1e-3, maxiter = 90, gtol = 1.5e4)
+
 
 # END OF CONJUGATE GRADIENTS ALGORITHM
 # ====================================
@@ -75,8 +75,10 @@ err_after = norms[-1]
 print 'Error after algorithm:', err_after
 
 # Unpack parameters 
-theta_a, s_a = srModel.unvectorizeParameters(v, D.N, ('theta', 's'))
-theta_min, s_min = srModel.unvectorizeParameters(v_min, D.N, ('theta', 's'))
+theta_a = srModel.unvectorizeParameters(v, D.N, ('theta',))
+theta_min = srModel.unvectorizeParameters(v_min, D.N, ('theta',))
+s_a = s0
+s_min = s0
 
 err_theta = np.linalg.norm(D.theta - theta_a)
 print 'Error theta:', err_theta

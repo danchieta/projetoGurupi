@@ -94,3 +94,6 @@ resultIMG/*.png
 pyScripts/recycle\ bin
 tags
 degradedImg
+
+pyScripts/resultVectors/
+pyScripts/resultfigures/

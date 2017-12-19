@@ -312,7 +312,7 @@ class Data:
 
 
 	def setWindowLR(self, shape):
-		if shape[0] <= self.shapeLR[0] or shape[1] <= self.shapeLR[1]:
+		if shape[0] <= self.shapeLR[0] and shape[1] <= self.shapeLR[1]:
 			self.windowShapeLR = shape
 			self.windowed = True
 		else:

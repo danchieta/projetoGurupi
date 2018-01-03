@@ -9,26 +9,21 @@ import vismodule
 
 norms = np.array([])
 P = list()
+min_vectors = list()
 
-def func_step1(v):
-	global norms, P, s_min
+def func_step(v):
+	# function to be run after every iteration of the optimization algorithm
+	global norms, P, min_vectors
+	# save norm of the error (compared to true parameters) of the current solution
 	n = np.linalg.norm(v-vtrue)
 	norms = np.hstack([norms, n])
+
+	# if the current error is minimum, save current solution
 	if n == norms.min():
-		s_min = srModel.unvectorizeParameters(v, D.N, ('s'))
+		min_vectors = srModel.unvectorizeParameters(v, D.N, params)
+	
+	# save current likelihood
 	P.append(E2.vectorizedLikelihood(v, 1, gamma0, theta0))
-	print 'iteration'
-	print 'Current norm:', n
-
-def func_step2(v):
-	global norms, P, s_min, theta_min
-	n = np.linalg.norm(v-vtrue)
-	norms = np.hstack([norms, n])
-
-	if n == norms.min():
-		theta_min, s_min = srModel.unvectorizeParameters(v, D.N, ('theta', 's'))
-		
-	P.append(E2.vectorizedLikelihood(v, 1, gamma0))
 	print 'iteration'
 	print 'Current norm:', n
 
@@ -52,13 +47,11 @@ gamma0 = 2 # tamanho da funcao de espalhamento de ponto
 s0 = np.zeros((2,D.N)) #deslocamento da imagem
 theta0 = np.zeros(D.N) #angulo de rotacao (com variancia de pi/100)
 
-s_min = s0
-theta_min = theta0
-
 # FIRST STEP: Optimize shifts
 # ===========================
 # initial vector with shifts
 v0 = srModel.vectorizeParameters(s0)
+params = ('s0') # parameters included in vector for optimization
 
 # vector with true shifts
 vtrue = srModel.vectorizeParameters(D.s)
@@ -71,7 +64,7 @@ print 'Error before shifts optimization:', err_before
 P.append(E2.vectorizedLikelihood(v0, 1, gamma0, theta0))
 
 # use cg to optimize shifts
-v = scipy.optimize.fmin_cg(E2.vectorizedLikelihood, v0, args = (-1, gamma0, theta0), callback = func_step1, epsilon = 1e-10, maxiter = 30)
+v = scipy.optimize.fmin_cg(E2.vectorizedLikelihood, v0, args = (-1, gamma0, theta0), callback = func_step, epsilon = 1e-10, maxiter = 30)
 
 # recover s from the vector
 s_a = srModel.unvectorizeParameters(v, D.N, ('s'))
@@ -83,6 +76,7 @@ print 'Error after shifts optimization:', err_after
 # ===================================
 # Build a new initial vector using the shifts from the previous step
 v0 = srModel.vectorizeParameters(theta0, s_a)
+params = ('theta','s0') # parameters included in vector for optimization
 
 # vector with true shifts and angles
 vtrue = srModel.vectorizeParameters(D.theta, D.s)
@@ -92,15 +86,24 @@ err_before = np.linalg.norm(v0-vtrue)
 print 'Error before shifts AND theta optimization:', err_before
 
 # Optimize shifts and rotations
-v = scipy.optimize.fmin_cg(E2.vectorizedLikelihood, v0, args = (-1, gamma0), callback = func_step2, epsilon = 1e-10, maxiter = 40)
+v = scipy.optimize.fmin_cg(E2.vectorizedLikelihood, v0, args = (-1, gamma0), callback = func_step, epsilon = 1e-10, maxiter = 40)
+
+# END OF CONJUGATE GRADIENTS ALGORITHM
+# ====================================
+# Time to wrap things up for visualization.
 
 # norm of the error after algorithm
 print 'Error after algorithm:', norms[-1]
-
-P = np.array(P)
+P = np.array(P) # make array of list P
 
 # Unpack parameters 
 theta_a, s_a = srModel.unvectorizeParameters(v, D.N, ('theta', 's'))
+
+if len(min_vectors) == 1:
+	s_min = min_vectors
+	theta_min = theta0
+elif len(min_vectors) == 2:
+	theta_min, s_min = min_vectors
 
 err_theta = np.linalg.norm(D.theta - theta_a)
 print 'Error theta:', err_theta

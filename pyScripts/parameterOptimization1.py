@@ -10,14 +10,16 @@ import vismodule
 norms = np.array([])
 P = list()
 v_min = None
+gradients = np.array([])
 
 def func(v):
-	global norms, P, v_min
+	global norms, P, v_min, gradients
 	n = np.linalg.norm(v-vtrue)
 	norms = np.hstack([norms, n])
 	if n == norms.min():
 		v_min = v
 	P.append(E2.vectorizedLikelihood(v, 1, gamma = gamma0))
+	gradients = np.hstack([gradients, np.linalg.norm(scipy.optimize.approx_fprime(v, E2.vectorizedLikelihood, 1.5e-8, 1.0, gamma0))])
 	print 'iteration'
 	print 'Current norm:', n
 
@@ -93,6 +95,8 @@ fig1, ax1 = vismodule.compareParPlot(s_a, D.s, np.abs(D.theta-theta_a)*180/np.pi
 fig2, ax2 = vismodule.compareParPlot(s_min, D.s, np.abs(D.theta-theta_min)*180/np.pi, titlenote = u'[Menor erro encontrado]')
 
 fig3, ax3 = vismodule.progressionPlot(P, norms, E2.likelihood(D.gamma, D.theta, D.s))
+
+fig4, ax4 = vismodule.simplePlot((gradients,), title = u'Progressão da norma do gradiente', xlabel = u'Iteração')
 plt.show()
 
 vismodule.saveFigures(fig1, fig2, fig3)

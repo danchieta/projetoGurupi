@@ -81,3 +81,22 @@ def saveFigures(*args, **kwargs):
 	for fig in args:
 		fig.savefig(outFolder + folderName + 'figure_' + str(i) + extension)
 		i+=1
+
+def simplePlot(args, title=None, xlabel=None, ylabel=None):
+	fig2, ax2 = plt.subplots(figsize = (6,7))
+	if len(args) <= 2:
+		ax2.plot(*args)
+	else:
+		raise(Exception('Only two arguments for a 2D plot.'))
+	
+	if title is not None:
+		ax2.set_title(title)
+	if xlabel is not None:
+		ax2.set_xlabel(xlabel)
+	if ylabel is not None:
+		ax2.set_ylabel(ylabel)
+
+	return fig2, ax2
+
+
+	

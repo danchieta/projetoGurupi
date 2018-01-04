@@ -2,17 +2,18 @@ import numpy as np
 from PIL import Image
 import genModel
 
-def fmin_cg(fdiff, fdiff2, x0, i_max = 20, j_max = 10, errCG = 1e-3, errNR = 1e-3, n = 10):
+def fmin_cg(fdiff, fdiff2, x0, i_max = 20, j_max = 10, errCG = 1e-3, errNR = 1e-3, n = 10, callback = None, fdiff_args = tuple(), fdiff2_args = tuple()):
 	# find a value which minimizes a function f.
 	# i_max - maximum number CG of iterations
 	# j_max - maximum number of Newto-raphson iterations
 	# errCG - CG error tolerance
 	# errNR - Newton-Raphson maximum number of iterations
 	# n - number of iterations to restart CG algorithm
+	# callback - function to call after each iteration
 
 	# initial value
 	x = x0
-	# definition of CG gradioent variables
+	# definition of CG variables
 	i = 0
 	k = 0
 	r = -fdiff(x)
@@ -27,8 +28,8 @@ def fmin_cg(fdiff, fdiff2, x0, i_max = 20, j_max = 10, errCG = 1e-3, errNR = 1e-
 		
 		while True:
 			print '    j =', j
-			alpha = -(fdiff(x).T.dot(d))/(d.T.dot(fdiff2(saveToDisk = True).dot(d)))
-			x = x+alpha[0,0]*d
+			alpha = -(fdiff(x).T.dot(d))/(d.T.dot(fdiff2(x, *fdiff2_args).dot(d)))
+			x = x+alpha*d
 			j = j + 1
 			if not(j<j_max and (alpha**2.0)*delta_d>errNR**2.0):
 				break
@@ -42,6 +43,11 @@ def fmin_cg(fdiff, fdiff2, x0, i_max = 20, j_max = 10, errCG = 1e-3, errNR = 1e-
 			d = r
 			k = 0
 		i = i+1
+		if sum(x == nan) > 0:
+			print 'charque'
+			return alpha
+		if callback is not None:
+			callback(x)
 	return x
 
 

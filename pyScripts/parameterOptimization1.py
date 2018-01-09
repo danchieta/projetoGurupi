@@ -99,4 +99,4 @@ fig3, ax3 = vismodule.progressionPlot(P, norms, E2.likelihood(D.gamma, D.theta, 
 fig4, ax4 = vismodule.simplePlot((gradients,), title = u'Progressão da norma do gradiente', xlabel = u'Iteração')
 plt.show()
 
-vismodule.saveFigures(fig1, fig2, fig3)
+vismodule.saveFigures(fig1, fig2, fig3, fig4)

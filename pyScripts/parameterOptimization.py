@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import numpy as np
-import srModel
 import scipy.optimize
+import matplotlib.pyplot as plt
+# The modules below are mine
+import srModel
 import vismodule
 
 norms = []
@@ -24,13 +26,12 @@ def func_step(v):
 		args = (gamma0, theta0)
 	elif len(params) == 2:
 		args = (gamma0,)
-	print 'args len:', len(args)
-	gradients.append(np.linalg.norm(scipy.optimize.approx_fprime(v, E2.vectorizedLikelihood, 1.5e-8, 1.0, *args)))
+#	gradients.append(np.linalg.norm(scipy.optimize.approx_fprime(v, E2.vectorizedLikelihood, epsilon, 1.0, *args)))
 	
 	# save current likelihood
 	P.append(E2.vectorizedLikelihood(v, 1, gamma0, theta0))
-	print 'iteration'
-	print 'Current norm:', norms[-1]
+	print 'current error [' + str(len(norms)-1) + '] =', norms[-1]
+#	print 'current gradient [' + str(len(gradients)-1) + '] =', gradients[-1]
 
 inFolder = '../degradedImg/'
 csv1 = 'paramsImage.csv'
@@ -52,7 +53,7 @@ gamma0 = 2 # tamanho da funcao de espalhamento de ponto
 s0 = np.zeros((2,D.N)) #deslocamento da imagem
 theta0 = np.zeros(D.N) #angulo de rotacao (com variancia de pi/100)
 
-min_grad = 1.2e6 #CG algorithm should stop if gradient runs below this
+min_grad = 9e5 #CG algorithm should stop if gradient runs below this
 epsilon = 1.49012e-8 # norm of the step used in gradient approximation
 
 # FIRST STEP: Optimize shifts
@@ -99,7 +100,7 @@ v = scipy.optimize.fmin_cg(E2.vectorizedLikelihood, v0, args = (-1, gamma0), cal
 print 'Error after algorithm:', norms[-1]
 P = np.array(P) # make array of list P
 norms = np.array(norms)
-gradients = np.array(gradients)
+# gradients = np.array(gradients)
 
 # Unpack parameters 
 theta_a, s_a = srModel.unvectorizeParameters(v, D.N, ('theta', 's'))
@@ -124,6 +125,6 @@ fig2, ax2 = vismodule.compareParPlot(s_min, D.s, np.abs(D.theta-theta_min)*180/n
 
 fig3, ax3 = vismodule.progressionPlot(P, norms, E2.likelihood(D.gamma, D.theta, D.s))
 plt.show()
-fig4, ax4 = vismodule.simplePlot((gradients,), title = u'Progressão da norma do gradiente', xlabel = u'Iteração')
+# fig4, ax4 = vismodule.simplePlot((gradients,), title = u'Progressão da norma do gradiente', xlabel = u'Iteração')
 
-vismodule.saveFigures(fig1, fig2, fig3, fig4)
+vismodule.saveFigures(fig1, fig2, fig3)

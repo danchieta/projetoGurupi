@@ -42,7 +42,7 @@ D = srModel.Data(inFolder, csv1, csv2)
 
 # use just a small window of the image to compute parameters
 # reducing computational cost
-windowshape = (9,9)
+windowshape = (7,7)
 D.setWindowLR(windowshape)
 
 # create parameter estimator object
@@ -53,7 +53,6 @@ gamma0 = 2 # tamanho da funcao de espalhamento de ponto
 s0 = np.zeros((2,D.N)) #deslocamento da imagem
 theta0 = np.zeros(D.N) #angulo de rotacao (com variancia de pi/100)
 
-min_grad = 9e5 #CG algorithm should stop if gradient runs below this
 epsilon = 1.49012e-8 # norm of the step used in gradient approximation
 
 # FIRST STEP: Optimize shifts
@@ -63,6 +62,9 @@ v0 = srModel.vectorizeParameters(s0)
 params = ('s') # parameters included in vector for optimization
 
 vtrue = srModel.vectorizeParameters(D.s)
+
+#CG algorithm should stop if gradient runs below this
+min_grad = 0.09*np.linalg.norm(scipy.optimize.approx_fprime(v0, E2.vectorizedLikelihood, epsilon, -1, gamma0, theta0))
 
 # run function on initial vector to save error norm, gradient and function evaluation
 func_step(v0)
@@ -87,6 +89,10 @@ params = ('theta','s') # parameters included in vector for optimization
 # vector with true shifts and angles
 vtrue = srModel.vectorizeParameters(D.theta, D.s)
 
+#CG algorithm should stop if gradient runs below this
+min_grad = 0.02*np.linalg.norm(scipy.optimize.approx_fprime(v0, E2.vectorizedLikelihood, epsilon, -1, gamma0))
+
+func_step(v0)
 print 'Error before shifts AND theta optimization:', norms[-1]
 
 # Optimize shifts and rotations

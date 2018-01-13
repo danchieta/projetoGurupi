@@ -38,14 +38,19 @@ def progressionPlot(P, norms, Ptrue = None ):
 		ax2[0].plot(np.ones(P.size)*Ptrue, 'r-', label = 'Verossimilhança dos parâmetros reais'.decode('utf8'))
 	ax2[0].plot(P, label = 'Verossimilhança dos parâmetros estimados'.decode('utf8'))
 	ax2[0].set_title(u'Progressão do valor de verossimilhança durante\n a execução do algorítmo de gradientes conjugados')
-	xticks2 = ax2[0].set_xticks(range(0,P.size,10))
+	if P.size <= 20:
+		ticks = range(0,P.size)
+	else:
+		ticks = range(0,P.size, 10)
+
+	xticks2 = ax2[0].set_xticks(ticks)
 	ax2[0].set_xlabel(u'Iteração')
 	# plt.ylabel('$p(\gamma, \theta_k, \mathbf{s}_k | y)$ at iteration')
 	ax2[0].legend(loc = 0)
 
 	ax2[1].plot(norms)
 	ax2[1].set_title(u'Distância para a solução correta')
-	xticks3 = ax2[1].set_xticks(range(0,P.size,10))
+	xticks3 = ax2[1].set_xticks(ticks)
 	ax2[1].set_xlabel(u'Iteração')
 	ax2[1].set_ylabel('$\|c_{atual} - c_{real}\|$')
 	

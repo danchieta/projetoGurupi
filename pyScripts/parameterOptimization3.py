@@ -26,12 +26,12 @@ def func_step(v):
 		args = (gamma0, theta0)
 	elif len(params) == 2:
 		args = (gamma0,)
-	gradients.append(np.linalg.norm(scipy.optimize.approx_fprime(v, E2.vectorizedLikelihood, epsilon, 1.0, *args)))
+	# gradients.append(np.linalg.norm(scipy.optimize.approx_fprime(v, E2.vectorizedLikelihood, epsilon, 1.0, *args)))
 	
 	# save current likelihood
 	P.append(E2.vectorizedLikelihood(v, 1, gamma0, theta0))
 	print 'current error [' + str(len(norms)-1) + '] =', norms[-1]
-	print 'current gradient [' + str(len(gradients)-1) + '] =', gradients[-1]
+	# print 'current gradient [' + str(len(gradients)-1) + '] =', gradients[-1]
 
 inFolder = '../degradedImg/'
 csv1 = 'paramsImage.csv'
@@ -42,7 +42,7 @@ D = srModel.Data(inFolder, csv1, csv2)
 
 # use just a small window of the image to compute parameters
 # reducing computational cost
-windowshape = (7,7)
+windowshape = (9,9)
 D.setWindowLR(windowshape)
 
 # create parameter estimator object
@@ -55,6 +55,8 @@ theta0 = np.zeros(D.N) #angulo de rotacao (com variancia de pi/100)
 
 epsilon = 1.49012e-8 # norm of the step used in gradient approximation
 maxiter = [40, 40] # maximum number of iterations in the optimization algorithm for each step
+s_bounds = [(-2,2)]*s0.size
+theta_bounds = [(-4,4)]*theta0.size
 
 # FIRST STEP: Optimize shifts
 # ===========================
@@ -73,8 +75,8 @@ func_step(v0)
 # norm of the error before algorithm
 print 'Error before shifts optimization:', norms[0]
 
-# use cg to optimize shifts
-v = scipy.optimize.fmin_cg(E2.vectorizedLikelihood, v0, args = (-1, gamma0, theta0), callback = func_step, epsilon = epsilon, maxiter = maxiter[0], gtol = min_grad)
+# use newton-cg to optimize shifts
+v, nfeval0, rc0 = scipy.optimize.fmin_tnc(E2.vectorizedLikelihood, v0, args = (-1, gamma0, theta0), approx_grad = True, bounds = s_bounds, maxfun = 100, callback = func_step)
 
 # recover s from the vector
 s_a = srModel.unvectorizeParameters(v, D.N, ('s'))
@@ -87,10 +89,6 @@ print 'Error after shifts optimization:', norms[-1]
 v0 = srModel.vectorizeParameters(theta0, s_a)
 params = ('theta','s') # parameters included in vector for optimization
 
-#min_grad = 0.4*np.linalg.norm(scipy.optimize.approx_fprime(v0, E2.vectorizedLikelihood,
-	#epsilon, -1, gamma0))#CG algorithm should stop if gradient runs below this
-min_grad = 1e-5
-
 # vector with true shifts and angles
 vtrue = srModel.vectorizeParameters(D.theta, D.s)
 
@@ -101,7 +99,7 @@ func_step(v0)
 print 'Error before shifts AND theta optimization:', norms[-1]
 
 # Optimize shifts and rotations
-v = scipy.optimize.fmin_cg(E2.vectorizedLikelihood, v0, args = (-1, gamma0), callback = func_step, epsilon = epsilon, maxiter = maxiter[1], gtol = min_grad)
+v, nfeval0, rc0 = scipy.optimize.fmin_tnc(E2.vectorizedLikelihood, v0, args = (-1, gamma0), approx_grad = True, bounds = theta_bounds + s_bounds, callback = func_step)
 
 # END OF CONJUGATE GRADIENTS ALGORITHM
 # ====================================

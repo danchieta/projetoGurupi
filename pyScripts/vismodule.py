@@ -57,7 +57,10 @@ def progressionPlot(P, norms, Ptrue = None ):
 	return fig2, ax2
 
 def saveData(**kwargs):
-	outFolder = 'resultVectors/'
+	if kwargs.has_key('outFolder'):
+		outFolder = kwargs.pop('outFolder')
+	else:
+		outFolder = '../results/resultdata/'
 	
 	if not os.path.exists(outFolder):
 		os.makedirs(outFolder)
@@ -67,7 +70,10 @@ def saveData(**kwargs):
 	np.savez(outFolder + filename, **kwargs)
 
 def saveFigures(*args, **kwargs):
-	outFolder = 'resultfigures/'
+	if kwargs.has_key('outFolder'):
+		outFolder = kwargs.pop('outFolder')
+	else:
+		outFolder = '../results/resultplots/'
 
 	if not os.path.exists(outFolder):
 		os.makedirs(outFolder)
@@ -76,6 +82,11 @@ def saveFigures(*args, **kwargs):
 	folderName = t_now + '/'
 
 	os.makedirs(outFolder + folderName)
+
+	if kwargs.has_key('note'):
+		note = file(outFolder+folderName+'note.txt', 'w')
+		note.write(kwargs.pop('note'))
+		note.close()
 
 	try:
 		extension = '.' + kwargs['filetype']
@@ -86,6 +97,7 @@ def saveFigures(*args, **kwargs):
 	for fig in args:
 		fig.savefig(outFolder + folderName + 'figure_' + str(i) + extension)
 		i+=1
+
 
 def simplePlot(args, title=None, xlabel=None, ylabel=None):
 	fig2, ax2 = plt.subplots(figsize = (6,7))

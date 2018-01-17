@@ -13,9 +13,12 @@ csv2 = 'globalParams.csv'
 D = srModel.Data(inFolder, csv1, csv2)
 # create imge estimator object
 
+# load the file with the estimated parameters
+params_file = np.load('./resultVectors/parameters_2018-01-15_054041.npz')
+
 gamma = 2
-theta = D.theta
-s = D.s
+theta = params_file['ta']
+s = params_file['sa']
 
 E2 = srModel.ImageEstimator(D, gamma, theta, s)
 
@@ -26,8 +29,7 @@ x0 = np.ones(np.prod(D.getShapeHR()))*128
 
 x, nfeval, rc = scipy.optimize.fmin_tnc(E2.getImageLikelihood, x0, fprime = E2.getImgLdiff, args = (-1.0,))
 
-
-img = D.getImgVec(0).min() + ((x - x.min())*(D.getImgVec(0).max() - D.getImgVec(0).min())/(x.max() - x.min())).reshape(D.getShapeHR(), order = 'f')
+img = srModel.equalize_histogram(x).reshape(D.getShapeHR(), order = 'f')
 imgr = Image.fromarray(img.astype(np.uint8))
 imgr.save('result.png')
 

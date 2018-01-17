@@ -2,6 +2,17 @@ import numpy as np
 from PIL import Image
 import genModel
 
+def equalize_histogram(im, nbr_bins = 256):
+	#get image histogram
+	imhist,bins = np.histogram(im.flatten(),nbr_bins,normed=True)
+	cdf = imhist.cumsum() #cumulative distribution function
+	cdf = 255 * cdf / cdf[-1] #normalize
+
+	#use linear interpolation of cdf to find new pixel values
+	im2 = np.interp(im.flatten(),bins[:-1],cdf)
+
+	return im2.reshape(im.shape)
+
 def fmin_cg(fdiff, fdiff2, x0, i_max = 20, j_max = 10, errCG = 1e-3, errNR = 1e-3, n = 10, callback = None, fdiff_args = tuple(), fdiff2_args = tuple()):
 	# find a value which minimizes a function f.
 	# i_max - maximum number CG of iterations

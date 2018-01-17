@@ -15,7 +15,9 @@ min_params = ()
 
 def unpack_min_vectors(min_vectors, params):
 	par_dict = {'gamma':gamma0, 'theta':theta0, 's':s0}
-
+	
+	if type(min_vectors) is not tuple:
+		min_vectors = (min_vectors,)
 	for par, vec in zip(params, min_vectors):
 		par_dict[par] = vec
 	
@@ -24,7 +26,7 @@ def unpack_min_vectors(min_vectors, params):
 
 def func_step(v):
 	# function to be run after every iteration of the optimization algorithm
-	global norms, P, min_vectors #, gradients
+	global norms, P, min_vectors, min_params #, gradients
 	# save norm of the error (compared to true parameters) of the current solution
 	norms.append(np.linalg.norm(v-vtrue))
 
@@ -68,7 +70,10 @@ theta0 = np.zeros(D.N) #angulo de rotacao (com variancia de pi/100)
 
 epsilon = 1.49012e-8 # norm of the step used in gradient approximation
 s_bounds = [(-2,2)]*s0.size
-theta_bounds = [(-4,4)]*theta0.size
+theta_bounds = [(-4*np.pi/180,4*np.pi/180)]*theta0.size
+gamma_bounds = [(1,7)]
+
+maxfeval = [150,300,300]
 
 # STEP 1: Optimize shifts
 # ===========================
@@ -85,10 +90,10 @@ func_step(v0)
 print 'Error before shifts optimization:', norms[0]
 
 # use Truncated Newton Nethod to optimize shifts
-v, nfeval0, rc0 = scipy.optimize.fmin_tnc(E2.vectorizedLikelihood, v0, args = (-1, gamma0, theta0), approx_grad = True, bounds = s_bounds, maxfun = 100, callback = func_step)
+v, nfeval0, rc0 = scipy.optimize.fmin_tnc(E2.vectorizedLikelihood, v0, args = (-1, gamma0, theta0), approx_grad = True, bounds = s_bounds, maxfun = maxfeval[0], callback = func_step)
 
 # recover s from the vector
-s_a = srModel.unvectorizeParameters(v, D.N, *params)
+s_a = srModel.unvectorizeParameters(v, D.N, params)
 
 print 'Error after shifts optimization:', norms[-1]
 
@@ -105,9 +110,9 @@ func_step(v0)
 print 'Error before shifts AND theta optimization:', norms[-1]
 
 # use Truncated Newton Nethod to optimize shifts and rotation angles
-v, nfeval0, rc0 = scipy.optimize.fmin_tnc(E2.vectorizedLikelihood, v0, args = (-1, gamma0), approx_grad = True, bounds = theta_bounds + s_bounds, callback = func_step)
+v, nfeval0, rc0 = scipy.optimize.fmin_tnc(E2.vectorizedLikelihood, v0, args = (-1, gamma0), approx_grad = True, bounds = theta_bounds + s_bounds, maxfun = maxfeval[1] , callback = func_step)
 
-theta_a, s_a = srModel.unvectorizeParameters(v, D.N, *params)
+theta_a, s_a = srModel.unvectorizeParameters(v, D.N, params)
 
 print 'Error after shifts AND theta optimization:', norms[-1]
 
@@ -124,7 +129,7 @@ func_step(v0)
 print 'Error before all parameters optimization:', norms[-1]
 
 # use Truncated Newton Nethod to optimize shifts and rotation angles
-v, nfeval0, rc0 = scipy.optimize.fmin_tnc(E2.vectorizedLikelihood, v0, args = (-1,), approx_grad = True, bounds = theta_bounds + s_bounds, callback = func_step)
+v, nfeval0, rc0 = scipy.optimize.fmin_tnc(E2.vectorizedLikelihood, v0, args = (-1,), approx_grad = True, bounds = gamma_bounds + theta_bounds + s_bounds, maxfun = maxfeval[2] , callback = func_step)
 
 # END OF OPTIMIZATION PROCESS
 # ====================================
@@ -134,10 +139,10 @@ v, nfeval0, rc0 = scipy.optimize.fmin_tnc(E2.vectorizedLikelihood, v0, args = (-
 print 'Error after optimization:', norms[-1]
 P = np.array(P) # make array of list P
 norms = np.array(norms)
-gradients = np.array(gradients)
+# gradients = np.array(gradients)
 
 # Unpack parameters 
-gamma_a, theta_a, s_a = srModel.unvectorizeParameters(v, D.N, *params)
+gamma_a, theta_a, s_a = srModel.unvectorizeParameters(v, D.N, params)
 
 # Unpack the parameters that became coser to correct solution
 gamma_min, theta_min, s_min = unpack_min_vectors(min_vectors, min_params)

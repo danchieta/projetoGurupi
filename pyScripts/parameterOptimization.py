@@ -3,6 +3,7 @@
 import numpy as np
 import scipy.optimize
 import matplotlib.pyplot as plt
+import time
 # The modules below were written by me
 import srModel
 import vismodule
@@ -57,7 +58,7 @@ D = srModel.Data(inFolder, csv1, csv2)
 
 # use just a small window of the image to compute parameters
 # reducing computational cost
-windowshape = (5,5)
+windowshape = (9,9)
 D.setWindowLR(windowshape)
 
 # create parameter estimator object
@@ -73,7 +74,7 @@ s_bounds = [(-2,2)]*s0.size
 theta_bounds = [(-4*np.pi/180,4*np.pi/180)]*theta0.size
 gamma_bounds = [(1,7)]
 
-maxfeval = [150,300,300]
+maxfeval = [100,150,150]
 
 # STEP 1: Optimize shifts
 # ===========================
@@ -89,6 +90,7 @@ func_step(v0)
 # norm of the error before algorithm
 print 'Error before shifts optimization:', norms[0]
 
+tic = time.time() #start counting time
 # use Truncated Newton Nethod to optimize shifts
 v, nfeval0, rc0 = scipy.optimize.fmin_tnc(E2.vectorizedLikelihood, v0, args = (-1, gamma0, theta0), approx_grad = True, bounds = s_bounds, maxfun = maxfeval[0], callback = func_step)
 
@@ -131,6 +133,9 @@ print 'Error before all parameters optimization:', norms[-1]
 # use Truncated Newton Nethod to optimize shifts and rotation angles
 v, nfeval0, rc0 = scipy.optimize.fmin_tnc(E2.vectorizedLikelihood, v0, args = (-1,), approx_grad = True, bounds = gamma_bounds + theta_bounds + s_bounds, maxfun = maxfeval[2] , callback = func_step)
 
+toc = time.time() - tic # stop counting time
+print 'Elapsed time:', toc
+
 # END OF OPTIMIZATION PROCESS
 # ====================================
 # Time to wrap things up for visualization.
@@ -154,13 +159,17 @@ err_s = np.linalg.norm(D.s - s_a, axis=0)
 print 'Mean of the error of s', err_s.mean()
 print err_s[np.newaxis].T
 
-vismodule.saveData(g0 = gamma0, s0 = theta0, t0 = theta0, sa = s_a, ta = theta_a, P = P, norms = norms, ws = np.array(windowshape))
+vismodule.saveData(g0 = gamma0, s0 = theta0, t0 = theta0, sa = s_a, ta = theta_a, P = P,
+	norms = norms, ws = np.array(windowshape))
 
-fig1, ax1 = vismodule.compareParPlot(s_a, D.s, np.abs(D.theta-theta_a)*180/np.pi, titlenote = u'[Máxima verossimilhança]' )
-fig2, ax2 = vismodule.compareParPlot(s_min, D.s, np.abs(D.theta-theta_min)*180/np.pi, titlenote = u'[Menor erro encontrado]')
+fig1, ax1 = vismodule.compareParPlot(s_a, D.s, np.abs(D.theta-theta_a)*180/np.pi,
+	titlenote = u'[Máxima verossimilhança]' )
+fig2, ax2 = vismodule.compareParPlot(s_min, D.s, np.abs(D.theta-theta_min)*180/np.pi,
+	titlenote = u'[Menor erro encontrado]')
 
 fig3, ax3 = vismodule.progressionPlot(P, norms, E2.likelihood(D.gamma, D.theta, D.s))
 plt.show()
 # fig4, ax4 = vismodule.simplePlot((gradients,), title = u'Progressão da norma do gradiente', xlabel = u'Iteração')
 
-vismodule.saveFigures(fig1, fig2, fig3) #, fig4)
+note = 'Vetor inicial: zeros \nJanela: '+str(windowshape)+'\nMaxfeval: '+str(maxfeval) + '\nElapsed time:'+str(toc)
+vismodule.saveFigures(fig1, fig2, fig3, note = note) #, fig4)

@@ -31,8 +31,8 @@ x, nfeval, rc = scipy.optimize.fmin_tnc(E2.getImageLikelihood, x0, fprime = E2.g
 
 img = srModel.equalize_histogram(x).reshape(D.getShapeHR(), order = 'f')
 imgr = Image.fromarray(img.astype(np.uint8))
-imgr.save('result.png')
+vismodule.save_image(imgr)
 
 plt.figure(1)
-plt.imshow(imgr)
+plt.imshow(imgr.convert('RGB'))
 plt.show()

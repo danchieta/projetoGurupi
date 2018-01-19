@@ -324,8 +324,17 @@ class Data:
 			lowerCorner = upperCorner + np.array(self.windowShapeLR)
 			window = img[upperCorner[0]:lowerCorner[0],upperCorner[1]:lowerCorner[1]]
 			return window.reshape((window.size,1), order = 'f') #.reshape(window.size,1)
-	def getImg(self, index):
-		return Image.open(self.inFolder + self.filename[index]).convert('L')
+
+	def getImg(self, index, new_size=None, resample_method = 'NEAREST'):
+		rs_dict = dict(nearest=0, bicubic=3, bilinear=2, lanczos=1)
+		image = Image.open(self.inFolder + self.filename[index]).convert('L')
+		if new_size is not None:
+			image = image.resize(new_size, resample = rs_dict[resample_method.lower()])
+		return image
+	
+	def getMeanImage(self, size = None, resample_method = 'nearest'):
+		img_array = [ np.array(self.getImg(i, size, resample_method)) for i in range(self.N) ] 
+		return Image.fromarray(np.mean(img_array, axis = 0)).convert('RGB')
 
 
 	def setWindowLR(self, shape):

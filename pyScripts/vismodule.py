@@ -116,8 +116,8 @@ def simplePlot(args, title=None, xlabel=None, ylabel=None):
 	return fig2, ax2
 
 
-def save_image(figure, outdir = '../results/result_images/' extension = '.png'):
+def save_image(figure, outfolder = '../results/result_images/', extension = '.png'):
 	if not os.path.exists(outfolder):
 		os.makedirs(outfolder)
 	t_now = str(datetime.datetime.now())[0:-7].replace(':', str()).replace(' ', '_')
-	figure.save(outdir+'result_'+t_now+extension)
+	figure.save(outfolder+'result_'+t_now+extension)

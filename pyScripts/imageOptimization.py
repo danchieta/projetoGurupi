@@ -1,8 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import srModel
 import scipy.optimize
 from PIL import Image
+
+import vismodule
+import srModel
 
 inFolder = '../degradedImg/'
 csv1 = 'paramsImage.csv'
@@ -14,7 +16,7 @@ D = srModel.Data(inFolder, csv1, csv2)
 # create imge estimator object
 
 # load the file with the estimated parameters
-params_file = np.load('./resultVectors/parameters_2018-01-15_054041.npz')
+params_file = np.load('../results/resultdata/parameters_2018-01-20_120036.npz')
 
 gamma = 2
 theta = params_file['ta']

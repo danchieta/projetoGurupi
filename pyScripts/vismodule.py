@@ -70,7 +70,7 @@ def saveData(**kwargs):
 	np.savez(outFolder + filename, **kwargs)
 
 def saveFigures(*args, **kwargs):
-	if kwargs.has_key('outFolder'):
+	if 'outFolder' in kwargs:
 		outFolder = kwargs.pop('outFolder')
 	else:
 		outFolder = '../results/resultplots/'
@@ -88,9 +88,9 @@ def saveFigures(*args, **kwargs):
 		note.write(kwargs.pop('note'))
 		note.close()
 
-	try:
+	if 'filetype' in kwargs:
 		extension = '.' + kwargs['filetype']
-	except(KeyError):
+	else:
 		extension = str()
 	
 	i = 0

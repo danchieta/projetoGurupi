@@ -49,7 +49,7 @@ def func_step(v):
 	print 'current error [' + str(len(norms)-1) + '] =', norms[-1]
 	# print 'current gradient [' + str(len(gradients)-1) + '] =', gradients[-1]
 
-inFolder = '../degradedImg/'
+inFolder = '../degradedImg2/'
 csv1 = 'paramsImage.csv'
 csv2 = 'globalParams.csv'
 
@@ -58,7 +58,7 @@ D = srModel.Data(inFolder, csv1, csv2)
 
 # use just a small window of the image to compute parameters
 # reducing computational cost
-windowshape = (9,9)
+windowshape = (7,7)
 D.setWindowLR(windowshape)
 
 # create parameter estimator object

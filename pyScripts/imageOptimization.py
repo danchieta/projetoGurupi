@@ -6,7 +6,7 @@ from PIL import Image
 import vismodule
 import srModel
 
-inFolder = '../degradedImg/'
+inFolder = '../degradedImg2/'
 csv1 = 'paramsImage.csv'
 csv2 = 'globalParams.csv'
 
@@ -16,7 +16,7 @@ D = srModel.Data(inFolder, csv1, csv2)
 # create imge estimator object
 
 # load the file with the estimated parameters
-params_file = np.load('../results/resultdata/parameters_2018-01-20_120036.npz')
+params_file = np.load('../results/resultdata/parameters_2018-01-20_191232_this2.npz')
 
 gamma = 2
 theta = params_file['ta']

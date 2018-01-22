@@ -32,12 +32,12 @@ def compareParPlot(s, strue, thetaerror, titlenote = None):
 	return fig1, ax1
 
 def progressionPlot(P, norms, Ptrue = None ):
-	fig2, ax2 = plt.subplots(2,1, figsize = (6,7))
-	fig2.subplots_adjust(hspace=.3, top = .92)
+	fig2, ax2 = plt.subplots(1,2, figsize = (12,4))
+	fig2.subplots_adjust(hspace=.3, top = .92, left=.05, right=.96)
 	if Ptrue is not None:
 		ax2[0].plot(np.ones(P.size)*Ptrue, 'r-', label = 'Verossimilhança dos parâmetros reais'.decode('utf8'))
 	ax2[0].plot(P, label = 'Verossimilhança dos parâmetros estimados'.decode('utf8'))
-	ax2[0].set_title(u'Progressão do valor de verossimilhança durante\n a execução do algorítmo de gradientes conjugados')
+	ax2[0].set_title(u'Progressão do valor de verossimilhança')
 	if P.size <= 20:
 		ticks = range(0,P.size)
 	else:

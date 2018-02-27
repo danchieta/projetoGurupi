@@ -11,7 +11,12 @@ ou seja, os quadros de vídeo são simulados e gerados a partir de uma imagem de
 
 A ferramenta parte de uma imagem de 152x92 pixels como a mostrada abaixo.
 
+![original](https://github.com/danchieta/projetoGurupi/blob/master/readme_img/imteste2s.png)
+
 A partir dessa imagem, foi gerado um conjunto de imagens degradadas de 38x23 pixels.
+
+![degraded image](https://github.com/danchieta/projetoGurupi/blob/master/readme_img/resized_nearest2.png)
 
 Essas imagens foram utilizadas para obter a seguinte imagem restaurada.
 
+![restored w sr](https://github.com/danchieta/projetoGurupi/blob/master/readme_img/restored_image_sr2.png)

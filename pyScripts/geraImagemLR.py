@@ -4,15 +4,15 @@ import csv
 import genModel
 import os
 
-outFolder = '../degradedImg2/' #diretorio de saida
+outFolder = '../ece584Degraded/' #diretorio de saida
 outFormat = '.png' #formato de saida
 
 # cria pasta de saida caso ela nao exista
 if not os.path.exists(outFolder):
     os.makedirs(outFolder)
 
-N = 20 #numero de imagens a serem geradas
-img = np.array(Image.open('../testIMG/imteste2s.png').convert('L')) #abre imagem a ser degradada
+N = 10 #numero de imagens a serem geradas
+img = np.array(Image.open('../testIMG/letter.png').convert('L')) #abre imagem a ser degradada
 f = 0.25 # fator de subamostragem
 gamma = 2 # tamanho da funcao de espalhamento de ponto
 s = np.random.rand(2,N)*4-2 #deslocamento da imagem

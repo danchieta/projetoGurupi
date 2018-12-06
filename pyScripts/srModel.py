@@ -222,19 +222,18 @@ class ParameterEstimator:
 		if s is not None:
 			params.remove('s')
 
-		if len(params) == 1:
-			exec(params[0] + '= unvectorizeParameters(x, self.imageData.N, tuple(params))')
-		elif len(params) > 1:
-			# if there is more than one parameter to unpack from the vector
-			# turn the params list into a string then shape it like a tuple 
-			# definition so we can parse it into the exec command
-			strp = str(params)
-			strp = strp.replace('[','(')
-			strp = strp.replace(']',')')
-			strp = strp.replace('\'','')
-			exec(strp + '= unvectorizeParameters(x, self.imageData.N, tuple(params))')
+		d1 = dict(gamma = gamma, theta = theta, s = s)
 
-		return self.likelihood(gamma, theta, s, sign)
+		k = unvectorizeParameters(x, self.imageData.N, tuple(params))
+		if len(params) == 1:
+			d1[params[0]] = k
+			
+		else:
+			for (p,kv) in zip(params,k):
+				d1[p] = kv
+
+		return self.likelihood(d1['gamma'], d1['theta'], d1['s'], sign)
+
 
 class ImageEstimator:
 	def __init__(self, imageData, gamma, theta, s):

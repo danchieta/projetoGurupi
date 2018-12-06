@@ -13,21 +13,21 @@ def compareParPlot(s, strue, thetaerror, titlenote = None):
 
 	fig1, ax1 = plt.subplots(1,2, figsize = (9.5,4.75))
 	fig1.subplots_adjust(right=.97, left = .08)
-	ax1[0].scatter(strue[0,:], strue[1,:], marker = 'o', label = u'Valores reais')
-	ax1[0].scatter(s[0,:], s[1,:], marker = '^', label = u'Valores estimados')
+	ax1[0].scatter(strue[0,:], strue[1,:], marker = 'o', label = 'Valores reais')
+	ax1[0].scatter(s[0,:], s[1,:], marker = '^', label = 'Valores estimados')
 	for k in range(thetaerror.size):
 		ax1[0].plot([strue[0,k],s[0,k]],[strue[1,k],s[1,k]], 'k--')
 	ax1[0].legend(loc = 0)
-	ax1[0].set_title(u'Comparação dos parâmetros de deslocamento'+titlenote)
-	ax1[0].set_xlabel(u'Deslocamento horizontal')
-	ax1[0].set_ylabel(u'Deslocamento vertical')
+	ax1[0].set_title('Comparação dos parâmetros de deslocamento'+titlenote)
+	ax1[0].set_xlabel('Deslocamento horizontal')
+	ax1[0].set_ylabel('Deslocamento vertical')
 
 	cwidth = 0.75
 	ax1[1].bar(np.arange(thetaerror.size), thetaerror, cwidth)
-	xticks11 = ax1[1].set_xticks(range(thetaerror.size))
-	ax1[1].set_title(u'Erro dos ângulos de rotação estimados'+titlenote)
-	ax1[1].set_xlabel(u'Imagem')
-	ax1[1].set_ylabel(u'Erro do ângulo estimado (graus)')
+	xticks11 = ax1[1].set_xticks(list(range(thetaerror.size)))
+	ax1[1].set_title('Erro dos ângulos de rotação estimados'+titlenote)
+	ax1[1].set_xlabel('Imagem')
+	ax1[1].set_ylabel('Erro do ângulo estimado (graus)')
 
 	return fig1, ax1
 
@@ -37,27 +37,27 @@ def progressionPlot(P, norms, Ptrue = None ):
 	if Ptrue is not None:
 		ax2[0].plot(np.ones(P.size)*Ptrue, 'r-', label = 'Verossimilhança dos parâmetros reais'.decode('utf8'))
 	ax2[0].plot(P, label = 'Verossimilhança dos parâmetros estimados'.decode('utf8'))
-	ax2[0].set_title(u'Progressão do valor de verossimilhança')
+	ax2[0].set_title('Progressão do valor de verossimilhança')
 	if P.size <= 20:
-		ticks = range(0,P.size)
+		ticks = list(range(0,P.size))
 	else:
-		ticks = range(0,P.size, 10)
+		ticks = list(range(0,P.size, 10))
 
 	xticks2 = ax2[0].set_xticks(ticks)
-	ax2[0].set_xlabel(u'Iteração')
+	ax2[0].set_xlabel('Iteração')
 	# plt.ylabel('$p(\gamma, \theta_k, \mathbf{s}_k | y)$ at iteration')
 	ax2[0].legend(loc = 0)
 
 	ax2[1].plot(norms)
-	ax2[1].set_title(u'Distância para a solução correta')
+	ax2[1].set_title('Distância para a solução correta')
 	xticks3 = ax2[1].set_xticks(ticks)
-	ax2[1].set_xlabel(u'Iteração')
+	ax2[1].set_xlabel('Iteração')
 	ax2[1].set_ylabel('$\|c_{atual} - c_{real}\|$')
 	
 	return fig2, ax2
 
 def saveData(**kwargs):
-	if kwargs.has_key('outFolder'):
+	if 'outFolder' in kwargs:
 		outFolder = kwargs.pop('outFolder')
 	else:
 		outFolder = '../results/resultdata/'
@@ -83,7 +83,7 @@ def saveFigures(*args, **kwargs):
 
 	os.makedirs(outFolder + folderName)
 
-	if kwargs.has_key('note'):
+	if 'note' in kwargs:
 		note = file(outFolder+folderName+'note.txt', 'w')
 		note.write(kwargs.pop('note'))
 		note.close()
@@ -104,7 +104,7 @@ def simplePlot(args, title=None, xlabel=None, ylabel=None):
 	if len(args) <= 2:
 		ax2.plot(*args)
 	else:
-		raise(Exception('Only two arguments for a 2D plot.'))
+		raise Exception
 	
 	if title is not None:
 		ax2.set_title(title)

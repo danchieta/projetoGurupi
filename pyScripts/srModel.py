@@ -33,12 +33,12 @@ def fmin_cg(fdiff, fdiff2, x0, i_max = 20, j_max = 10, errCG = 1e-3, errNR = 1e-
 	delta0 = delta_new
 
 	while i<i_max and delta_new > (errCG**2.0)*delta0:
-		print 'i =', i
+		print('i =', i)
 		j = 0
 		delta_d = d.T.dot(d)
 		
 		while True:
-			print '    j =', j
+			print('    j =', j)
 			alpha = -(fdiff(x).T.dot(d))/(d.T.dot(fdiff2(x, *fdiff2_args).dot(d)))
 			x = x+alpha*d
 			j = j + 1
@@ -55,7 +55,7 @@ def fmin_cg(fdiff, fdiff2, x0, i_max = 20, j_max = 10, errCG = 1e-3, errNR = 1e-
 			k = 0
 		i = i+1
 		if sum(x == nan) > 0:
-			print 'charque'
+			print('charque')
 			return alpha
 		if callback is not None:
 			callback(x)
@@ -80,28 +80,28 @@ def priorCovMat(shapeHR, A = 0.04, r=1, dtype='float64', savetoDisk = False):
 			raise Exception()
 		covFile = np.load('priorCov.npz')
 		if covFile['A'] == A and covFile['r'] == r and covFile['invZ'].shape[0]==np.prod(shapeHR):
-			print 'Loading inverse covarianve matrix and determinant from disk.'
+			print('Loading inverse covarianve matrix and determinant from disk.')
 			detZ = covFile['detZ']
 			invZ = covFile['invZ']
 		else:
 			raise Exception()
 
 	except:
-		print 'Computing covariance matrix of the prior distribution'
+		print('Computing covariance matrix of the prior distribution')
 		vec_i = genModel.vecOfSub(shapeHR).astype(dtype)
 		Z = np.array([vec_i[0][np.newaxis].T - vec_i[0],
 			vec_i[1][np.newaxis].T - vec_i[1]])
 		Z = np.linalg.norm(Z,axis=0)
 		Z = A*np.exp(-Z**2/r**2)
 
-		print '   Computing log determinant'
+		print('   Computing log determinant')
 		sign, detZ = np.linalg.slogdet(Z)
 
-		print '   Computing inverse matrix'
+		print('   Computing inverse matrix')
 		invZ = np.linalg.inv(Z)
 
 		if savetoDisk:
-			print 'Saving covariance matrix to disk.'
+			print('Saving covariance matrix to disk.')
 			np.savez('priorCov.npz', invZ=invZ, detZ=detZ, A=A, r=r)
 	return invZ, detZ
 
@@ -272,7 +272,7 @@ class ImageEstimator:
 
 	def getImgLdiff2(self, x, sign = 1.0, saveToDisk = True): 
 		def calcImgdiff2(self):
-			print 'Calculating second order differential'
+			print('Calculating second order differential')
 			imgDiff2 = -(self.invZ_x.T + self.invZ_x)/2.0
 			for k in range(self.imageData.N):
 				imgDiff2 = imgDiff2 - self.W[k].T.dot(self.W[k])
@@ -286,12 +286,12 @@ class ImageEstimator:
 					# load matrix from file and return
 					diff2File= np.load('diff2.npz')
 					self.imgDiff2 = diff2File['imgDiff2']			
-					print 'Second order differential loaded from disk'
+					print('Second order differential loaded from disk')
 					return sign*self.imgDiff2
 				except:
 					# calculate and save matrix to disk
 					self.imgDiff2 = calcImgdiff2(self)# calculate diff2
-					print 'Saving second order differential to disk.'
+					print('Saving second order differential to disk.')
 					np.savez('diff2.npz', imgDiff2=self.imgDiff2)
 					return sign*self.imgDiff2
 			else:

@@ -22,7 +22,7 @@ beta = 400 # precisao = 1/variancia do ruido
 filename = [] #inicia lista com nomes de arquivo
 
 for k in range(N):
-	print 'gerando imgagem' + str(k)
+	print('gerando imgagem' + str(k))
 	y = genModel.degradaImagem(img,gamma,theta[k],s[:,k],f,beta)
 	imgr = Image.fromarray(y).convert('RGB')
 	filename.append('result-'+str(k)+outFormat)

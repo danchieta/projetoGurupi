@@ -6,7 +6,7 @@ from PIL import Image
 import vismodule
 import srModel
 
-inFolder = '../ece584Degraded/'
+inFolder = '../degradedImg/'
 csv1 = 'paramsImage.csv'
 csv2 = 'globalParams.csv'
 

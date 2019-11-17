@@ -49,7 +49,7 @@ def func_step(v):
 	print('current error [' + str(len(norms)-1) + '] =', norms[-1])
 	# print 'current gradient [' + str(len(gradients)-1) + '] =', gradients[-1]
 
-inFolder = '../ece584Degraded/'
+inFolder = '../degradedImg/'
 csv1 = 'paramsImage.csv'
 csv2 = 'globalParams.csv'
 

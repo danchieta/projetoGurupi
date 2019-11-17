@@ -10,7 +10,7 @@ def decimate(shapei, shapeo):
 	return np.array([x,y])
 
 def vecOfSub(shp):
-	y,x = np.meshgrid(range(shp[1]),range(shp[0]))
+	y,x = np.meshgrid(list(range(shp[1])),list(range(shp[0])))
 	x = np.reshape(x,(1,x.size),order='f').squeeze()
 	y = np.reshape(y,(1,y.size),order='f').squeeze()
 	return np.array([x,y])

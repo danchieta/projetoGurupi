@@ -33,12 +33,12 @@ def fmin_cg(fdiff, fdiff2, x0, i_max = 20, j_max = 10, errCG = 1e-3, errNR = 1e-
 	delta0 = delta_new
 
 	while i<i_max and delta_new > (errCG**2.0)*delta0:
-		print 'i =', i
+		print('i =', i)
 		j = 0
 		delta_d = d.T.dot(d)
 		
 		while True:
-			print '    j =', j
+			print('    j =', j)
 			alpha = -(fdiff(x).T.dot(d))/(d.T.dot(fdiff2(x, *fdiff2_args).dot(d)))
 			x = x+alpha*d
 			j = j + 1
@@ -55,7 +55,7 @@ def fmin_cg(fdiff, fdiff2, x0, i_max = 20, j_max = 10, errCG = 1e-3, errNR = 1e-
 			k = 0
 		i = i+1
 		if sum(x == nan) > 0:
-			print 'charque'
+			print('charque')
 			return alpha
 		if callback is not None:
 			callback(x)
@@ -80,28 +80,28 @@ def priorCovMat(shapeHR, A = 0.04, r=1, dtype='float64', savetoDisk = False):
 			raise Exception()
 		covFile = np.load('priorCov.npz')
 		if covFile['A'] == A and covFile['r'] == r and covFile['invZ'].shape[0]==np.prod(shapeHR):
-			print 'Loading inverse covarianve matrix and determinant from disk.'
+			print('Loading inverse covarianve matrix and determinant from disk.')
 			detZ = covFile['detZ']
 			invZ = covFile['invZ']
 		else:
 			raise Exception()
 
 	except:
-		print 'Computing covariance matrix of the prior distribution'
+		print('Computing covariance matrix of the prior distribution')
 		vec_i = genModel.vecOfSub(shapeHR).astype(dtype)
 		Z = np.array([vec_i[0][np.newaxis].T - vec_i[0],
 			vec_i[1][np.newaxis].T - vec_i[1]])
 		Z = np.linalg.norm(Z,axis=0)
 		Z = A*np.exp(-Z**2/r**2)
 
-		print '   Computing log determinant'
+		print('   Computing log determinant')
 		sign, detZ = np.linalg.slogdet(Z)
 
-		print '   Computing inverse matrix'
+		print('   Computing inverse matrix')
 		invZ = np.linalg.inv(Z)
 
 		if savetoDisk:
-			print 'Saving covariance matrix to disk.'
+			print('Saving covariance matrix to disk.')
 			np.savez('priorCov.npz', invZ=invZ, detZ=detZ, A=A, r=r)
 	return invZ, detZ
 
@@ -222,19 +222,18 @@ class ParameterEstimator:
 		if s is not None:
 			params.remove('s')
 
-		if len(params) == 1:
-			exec(params[0] + '= unvectorizeParameters(x, self.imageData.N, tuple(params))')
-		elif len(params) > 1:
-			# if there is more than one parameter to unpack from the vector
-			# turn the params list into a string then shape it like a tuple 
-			# definition so we can parse it into the exec command
-			strp = str(params)
-			strp = strp.replace('[','(')
-			strp = strp.replace(']',')')
-			strp = strp.replace('\'','')
-			exec(strp + '= unvectorizeParameters(x, self.imageData.N, tuple(params))')
+		d1 = dict(gamma = gamma, theta = theta, s = s)
 
-		return self.likelihood(gamma, theta, s, sign)
+		k = unvectorizeParameters(x, self.imageData.N, tuple(params))
+		if len(params) == 1:
+			d1[params[0]] = k
+			
+		else:
+			for (p,kv) in zip(params,k):
+				d1[p] = kv
+
+		return self.likelihood(d1['gamma'], d1['theta'], d1['s'], sign)
+
 
 class ImageEstimator:
 	def __init__(self, imageData, gamma, theta, s):
@@ -272,7 +271,7 @@ class ImageEstimator:
 
 	def getImgLdiff2(self, x, sign = 1.0, saveToDisk = True): 
 		def calcImgdiff2(self):
-			print 'Calculating second order differential'
+			print('Calculating second order differential')
 			imgDiff2 = -(self.invZ_x.T + self.invZ_x)/2.0
 			for k in range(self.imageData.N):
 				imgDiff2 = imgDiff2 - self.W[k].T.dot(self.W[k])
@@ -286,12 +285,12 @@ class ImageEstimator:
 					# load matrix from file and return
 					diff2File= np.load('diff2.npz')
 					self.imgDiff2 = diff2File['imgDiff2']			
-					print 'Second order differential loaded from disk'
+					print('Second order differential loaded from disk')
 					return sign*self.imgDiff2
 				except:
 					# calculate and save matrix to disk
 					self.imgDiff2 = calcImgdiff2(self)# calculate diff2
-					print 'Saving second order differential to disk.'
+					print('Saving second order differential to disk.')
 					np.savez('diff2.npz', imgDiff2=self.imgDiff2)
 					return sign*self.imgDiff2
 			else:
@@ -318,12 +317,12 @@ class Data:
 	def getImgVec(self, index):
 		img = np.array(Image.open(self.inFolder + self.filename[index]).convert('L'))
 		if not self.windowed:
-			return img.reshape((img.size,1), order = 'f')
+			return img.reshape((img.size,1), order = 'f')/255 -0.5
 		else:
 			upperCorner = (np.zeros(2) - np.array(self.windowShapeLR)/2.0 + np.array(img.shape)/2.0).astype(int)
 			lowerCorner = upperCorner + np.array(self.windowShapeLR)
 			window = img[upperCorner[0]:lowerCorner[0],upperCorner[1]:lowerCorner[1]]
-			return window.reshape((window.size,1), order = 'f') #.reshape(window.size,1)
+			return window.reshape((window.size,1), order = 'f')/255 -0.5 #.reshape(window.size,1)
 
 	def getImg(self, index, new_size=None, resample_method = 'NEAREST'):
 		rs_dict = dict(nearest=0, bicubic=3, bilinear=2, lanczos=1)

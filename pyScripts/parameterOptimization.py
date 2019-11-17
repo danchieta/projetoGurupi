@@ -46,10 +46,10 @@ def func_step(v):
 	
 	# save current likelihood
 	P.append(E2.vectorizedLikelihood(v, 1, *args))
-	print 'current error [' + str(len(norms)-1) + '] =', norms[-1]
+	print('current error [' + str(len(norms)-1) + '] =', norms[-1])
 	# print 'current gradient [' + str(len(gradients)-1) + '] =', gradients[-1]
 
-inFolder = '../degradedImg2/'
+inFolder = '../ece584Degraded/'
 csv1 = 'paramsImage.csv'
 csv2 = 'globalParams.csv'
 
@@ -58,7 +58,7 @@ D = srModel.Data(inFolder, csv1, csv2)
 
 # use just a small window of the image to compute parameters
 # reducing computational cost
-windowshape = (7,7)
+windowshape = (5,5)
 D.setWindowLR(windowshape)
 
 # create parameter estimator object
@@ -92,7 +92,7 @@ vtrue = srModel.vectorizeParameters(D.s)
 func_step(v0)
 
 # norm of the error before algorithm
-print 'Error before shifts optimization:', norms[0]
+print('Error before shifts optimization:', norms[0])
 
 tic = time.time() #start counting time
 # use Truncated Newton Nethod to optimize shifts
@@ -103,7 +103,7 @@ v, nfeval[0], rc[0] = scipy.optimize.fmin_tnc(E2.vectorizedLikelihood, v0,
 # recover s from the vector
 s_a = srModel.unvectorizeParameters(v, D.N, params)
 
-print 'Error after shifts optimization:', norms[-1]
+print('Error after shifts optimization:', norms[-1])
 niterations.append(len(norms)-1)
 
 # STEP 2: Optimize shifts AND theta
@@ -116,7 +116,7 @@ params = ('theta','s') # parameters included in vector for optimization
 vtrue = srModel.vectorizeParameters(D.theta, D.s)
 
 func_step(v0)
-print 'Error before shifts AND theta optimization:', norms[-1]
+print('Error before shifts AND theta optimization:', norms[-1])
 
 # use Truncated Newton Nethod to optimize shifts and rotation angles
 v, nfeval[1], rc[1] = scipy.optimize.fmin_tnc(E2.vectorizedLikelihood, v0,
@@ -125,7 +125,7 @@ v, nfeval[1], rc[1] = scipy.optimize.fmin_tnc(E2.vectorizedLikelihood, v0,
 
 theta_a, s_a = srModel.unvectorizeParameters(v, D.N, params)
 
-print 'Error after shifts AND theta optimization:', norms[-1]
+print('Error after shifts AND theta optimization:', norms[-1])
 niterations.append(len(norms)-1-sum(niterations))
 
 # STEP 3: Optimize shifts AND theta
@@ -138,7 +138,7 @@ params = ('gamma','theta','s') # parameters included in vector for optimization
 vtrue = srModel.vectorizeParameters(D.gamma, D.theta, D.s)
 
 func_step(v0)
-print 'Error before all parameters optimization:', norms[-1]
+print('Error before all parameters optimization:', norms[-1])
 
 # use Truncated Newton Nethod to optimize shifts and rotation angles
 v, nfeval[2], rc[2] = scipy.optimize.fmin_tnc(E2.vectorizedLikelihood, v0, args = (-1,),
@@ -146,7 +146,7 @@ v, nfeval[2], rc[2] = scipy.optimize.fmin_tnc(E2.vectorizedLikelihood, v0, args 
 	maxfun = maxfeval[2] , callback = func_step)
 
 toc = time.time() - tic # stop counting time
-print 'Elapsed time:', toc
+print('Elapsed time:', toc)
 niterations.append(len(norms)-1-sum(niterations))
 
 # END OF OPTIMIZATION PROCESS
@@ -154,7 +154,7 @@ niterations.append(len(norms)-1-sum(niterations))
 # Time to wrap things up for visualization.
 
 # norm of the error after algorithm
-print 'Error after optimization:', norms[-1]
+print('Error after optimization:', norms[-1])
 P = np.array(P) # make array of list P
 norms = np.array(norms)
 # gradients = np.array(gradients)
@@ -166,11 +166,11 @@ gamma_a, theta_a, s_a = srModel.unvectorizeParameters(v, D.N, params)
 gamma_min, theta_min, s_min = unpack_min_vectors(min_vectors, min_params)
 
 err_theta = np.linalg.norm(D.theta - theta_a)
-print 'Error theta:', err_theta
+print('Error theta:', err_theta)
 
 err_s = np.linalg.norm(D.s - s_a, axis=0)
-print 'Mean of the error of s', err_s.mean()
-print err_s[np.newaxis].T
+print('Mean of the error of s', err_s.mean())
+print(err_s[np.newaxis].T)
 
 true_likelihood = E2.likelihood(D.gamma, D.theta, D.s)
 
@@ -180,9 +180,9 @@ vismodule.saveData(g0 = gamma0, s0 = theta0, t0 = theta0, ga = gamma_a, sa = s_a
 	nfe = np.array(nfeval))
 
 fig1, ax1 = vismodule.compareParPlot(s_a, D.s, np.abs(D.theta-theta_a)*180/np.pi,
-	titlenote = u'[Máxima verossimilhança]' )
+	titlenote = '[Maximum likelihood]' )
 fig2, ax2 = vismodule.compareParPlot(s_min, D.s, np.abs(D.theta-theta_min)*180/np.pi,
-	titlenote = u'[Menor erro encontrado]')
+	titlenote = '[Minimum error]')
 
 fig3, ax3 = vismodule.progressionPlot(P, norms, true_likelihood)
 plt.show()

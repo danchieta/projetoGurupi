@@ -11,8 +11,8 @@ outFormat = '.png' #formato de saida
 if not os.path.exists(outFolder):
     os.makedirs(outFolder)
 
-N = 10 #numero de imagens a serem geradas
-img = np.array(Image.open('../testIMG/letter.png').convert('L')) #abre imagem a ser degradada
+N = 25 #numero de imagens a serem geradas
+img = np.array(Image.open('../testIMG/letter1.png').convert('L')) #abre imagem a ser degradada
 f = 0.25 # fator de subamostragem
 gamma = 2 # tamanho da funcao de espalhamento de ponto
 s = np.random.rand(2,N)*4-2 #deslocamento da imagem
@@ -29,7 +29,7 @@ for k in range(N):
 	imgr.save(outFolder+filename[k])
 
 #salva parametros em arquivo .csv
-with open(outFolder + 'paramsImage.csv', 'wb') as csvfile:
+with open(outFolder + 'paramsImage.csv', 'w') as csvfile:
 	fields = ['filename','sx','sy','theta']
 	
 	plan = csv.DictWriter(csvfile, fieldnames=fields, delimiter=';')
@@ -41,7 +41,7 @@ with open(outFolder + 'paramsImage.csv', 'wb') as csvfile:
 			'sy':s[1,k],
 			'theta':theta[k]})
 
-with open(outFolder + 'globalParams.csv', 'wb') as csvfile:
+with open(outFolder + 'globalParams.csv', 'w') as csvfile:
 	fields = ['shapei0', 'shapei1', 'beta', 'f','gamma', 'N']
 	
 	plan = csv.DictWriter(csvfile, fieldnames=fields, delimiter=';')

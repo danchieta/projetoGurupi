@@ -49,7 +49,7 @@ def func_step(v):
 	print('current error [' + str(len(norms)-1) + '] =', norms[-1])
 	# print 'current gradient [' + str(len(gradients)-1) + '] =', gradients[-1]
 
-inFolder = '../degradedImg2/'
+inFolder = '../ece584Degraded/'
 csv1 = 'paramsImage.csv'
 csv2 = 'globalParams.csv'
 
@@ -58,7 +58,7 @@ D = srModel.Data(inFolder, csv1, csv2)
 
 # use just a small window of the image to compute parameters
 # reducing computational cost
-windowshape = (7,7)
+windowshape = (5,5)
 D.setWindowLR(windowshape)
 
 # create parameter estimator object
@@ -180,9 +180,9 @@ vismodule.saveData(g0 = gamma0, s0 = theta0, t0 = theta0, ga = gamma_a, sa = s_a
 	nfe = np.array(nfeval))
 
 fig1, ax1 = vismodule.compareParPlot(s_a, D.s, np.abs(D.theta-theta_a)*180/np.pi,
-	titlenote = '[Máxima verossimilhança]' )
+	titlenote = '[Maximum likelihood]' )
 fig2, ax2 = vismodule.compareParPlot(s_min, D.s, np.abs(D.theta-theta_min)*180/np.pi,
-	titlenote = '[Menor erro encontrado]')
+	titlenote = '[Minimum error]')
 
 fig3, ax3 = vismodule.progressionPlot(P, norms, true_likelihood)
 plt.show()

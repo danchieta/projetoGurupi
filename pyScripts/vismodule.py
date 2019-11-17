@@ -13,21 +13,21 @@ def compareParPlot(s, strue, thetaerror, titlenote = None):
 
 	fig1, ax1 = plt.subplots(1,2, figsize = (9.5,4.75))
 	fig1.subplots_adjust(right=.97, left = .08)
-	ax1[0].scatter(strue[0,:], strue[1,:], marker = 'o', label = 'Valores reais')
-	ax1[0].scatter(s[0,:], s[1,:], marker = '^', label = 'Valores estimados')
+	ax1[0].scatter(strue[0,:], strue[1,:], marker = 'o', label = 'True shifts')
+	ax1[0].scatter(s[0,:], s[1,:], marker = '^', label = 'Estimated shifts')
 	for k in range(thetaerror.size):
 		ax1[0].plot([strue[0,k],s[0,k]],[strue[1,k],s[1,k]], 'k--')
 	ax1[0].legend(loc = 0)
-	ax1[0].set_title('Comparação dos parâmetros de deslocamento'+titlenote)
-	ax1[0].set_xlabel('Deslocamento horizontal')
-	ax1[0].set_ylabel('Deslocamento vertical')
+	ax1[0].set_title('Comparison of shift parameters'+titlenote)
+	ax1[0].set_xlabel('Horizontal shift')
+	ax1[0].set_ylabel('Vertical shift')
 
 	cwidth = 0.75
 	ax1[1].bar(np.arange(thetaerror.size), thetaerror, cwidth)
 	xticks11 = ax1[1].set_xticks(list(range(thetaerror.size)))
-	ax1[1].set_title('Erro dos ângulos de rotação estimados'+titlenote)
-	ax1[1].set_xlabel('Imagem')
-	ax1[1].set_ylabel('Erro do ângulo estimado (graus)')
+	ax1[1].set_title('Error of the estimated angles'+titlenote)
+	ax1[1].set_xlabel('Image (k)')
+	ax1[1].set_ylabel('Error of the estimated angle (degrees)')
 
 	return fig1, ax1
 
@@ -35,24 +35,24 @@ def progressionPlot(P, norms, Ptrue = None ):
 	fig2, ax2 = plt.subplots(1,2, figsize = (12,4))
 	fig2.subplots_adjust(hspace=.3, top = .92, left=.05, right=.96)
 	if Ptrue is not None:
-		ax2[0].plot(np.ones(P.size)*Ptrue, 'r-', label = 'Verossimilhança dos parâmetros reais'.decode('utf8'))
-	ax2[0].plot(P, label = 'Verossimilhança dos parâmetros estimados'.decode('utf8'))
-	ax2[0].set_title('Progressão do valor de verossimilhança')
+		ax2[0].plot(np.ones(P.size)*Ptrue, 'r-', label = 'Likelihood of the true parameters')
+	ax2[0].plot(P, label = 'Likelihood of the estimated parameters')
+	ax2[0].set_title('Likelihood through iterations')
 	if P.size <= 20:
 		ticks = list(range(0,P.size))
 	else:
 		ticks = list(range(0,P.size, 10))
 
 	xticks2 = ax2[0].set_xticks(ticks)
-	ax2[0].set_xlabel('Iteração')
+	ax2[0].set_xlabel('Iteration')
 	# plt.ylabel('$p(\gamma, \theta_k, \mathbf{s}_k | y)$ at iteration')
 	ax2[0].legend(loc = 0)
 
 	ax2[1].plot(norms)
-	ax2[1].set_title('Distância para a solução correta')
+	ax2[1].set_title('Distance to correct solution')
 	xticks3 = ax2[1].set_xticks(ticks)
-	ax2[1].set_xlabel('Iteração')
-	ax2[1].set_ylabel('$\|c_{atual} - c_{real}\|$')
+	ax2[1].set_xlabel('Iteration')
+	ax2[1].set_ylabel('$\|c_{current} - c_{true}\|$')
 	
 	return fig2, ax2
 
@@ -84,7 +84,7 @@ def saveFigures(*args, **kwargs):
 	os.makedirs(outFolder + folderName)
 
 	if 'note' in kwargs:
-		note = file(outFolder+folderName+'note.txt', 'w')
+		note = open(outFolder+folderName+'note.txt', 'w')
 		note.write(kwargs.pop('note'))
 		note.close()
 

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Bayesian Image Super Resolution with Python </title>
+	<style>
+		body {
+			max-width: 700px;
+			margin: auto;
+		}
+	</style>
+</head>
+<body>
+	<h1 id="projetogurupi">projetoGurupi</h1>
+	<h2 id="project-summary-and-results">Project Summary and Results</h2>
+	<p>A tool for image restoration from video frames using Bayesian Super-resolution.
+	The method is described in the paper by <a href="http://www.cs.cmu.edu/~kangli/doc/papers/tipping03.pdf">Tipping and Bishop</a>.
+	The work was done in partial fulfillment to obtain the Barchelor&#39;s degree in computer engineering.
+	A full report on the project is found <a href="https://github.com/danchieta/projetoGurupi_texto/blob/master/projetoGurupi.pdf">here</a> (in Portuguese).</p>
+	<p>This tool is able to obtain a high resolution image from a set of low resolution
+	images from the same scene.
+	Tests were made using only synthetic data as input, i.e. the low resolution 
+	images were obtained by downsampling, warping an rotating a higher resolution
+	image.</p>
+	<p>The HR image has 152x104 and is shown below.</p>
+	<p><img src="https://github.com/danchieta/projetoGurupi/blob/master/testIMG/imtestes.png" alt="original"></p>
+	<p>A set of LR images with 38x26 pixels were generated from it.</p>
+	<p><img src="https://github.com/danchieta/projetoGurupi/blob/master/readme_img/resized_nearest.png" alt="degraded image"></p>
+	<p>The image below was obtained from the set of LR images using Bayesian super resolution.</p>
+	<p><img src="https://github.com/danchieta/projetoGurupi/blob/master/readme_img/restored_sr.png" alt="restored w sr"></p>
+</body>
+</html>

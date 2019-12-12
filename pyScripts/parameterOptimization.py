@@ -58,7 +58,7 @@ D = srModel.Data(inFolder, csv1, csv2)
 
 # use just a small window of the image to compute parameters
 # reducing computational cost
-windowshape = (5,5)
+windowshape = (9,9)
 D.setWindowLR(windowshape)
 
 # create parameter estimator object
@@ -74,7 +74,7 @@ s_bounds = [(-2,2)]*s0.size
 theta_bounds = [(-4*np.pi/180,4*np.pi/180)]*theta0.size
 gamma_bounds = [(1,7)]
 
-maxfeval = [70,70,30]
+maxfeval = [20,20,50]
 
 nfeval = [0,]*3
 rc = [0,]*3

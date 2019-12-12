@@ -4,7 +4,7 @@ import genModel
 
 def equalize_histogram(im, nbr_bins = 256):
 	#get image histogram
-	imhist,bins = np.histogram(im.flatten(),nbr_bins,normed=True)
+	imhist,bins = np.histogram(im.flatten(),nbr_bins,density=True)
 	cdf = imhist.cumsum() #cumulative distribution function
 	cdf = 255 * cdf / cdf[-1] #normalize
 
